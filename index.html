@@ -41,7 +41,9 @@
   --ui-accent-soft: #edeefe;
   --ui-success: #17784b;
   --ui-live: #1d9a5a;
-  --font-display: "Songti SC", "STSong", ui-serif, "Iowan Old Style", Georgia, "Noto Serif SC", serif;
+  /* A real Chinese serif where installed (Songti on a Mac), else one sans for every glyph: iPhones
+     have no Songti, and letting each character fall back separately mixes Mincho and PingFang. */
+  --font-display: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif SC", "Noto Serif CJK SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --font-ui-serif: ui-serif, "New York", "Iowan Old Style", "Songti SC", "STSong", Georgia, serif;
@@ -393,21 +395,34 @@ em { font-style: normal; }
 }
 .demo-note { margin: 20px auto 0; text-align: center; }
 
-/* Ways: intro collage */
+/* Ways: intro collage. A still collage by default; on a desktop with motion allowed the stage pins
+   and the tiles spiral out of the ⌥ key, then orbit the headline as the page scrolls (app.js). */
 .ways { padding-top: clamp(96px, 11vw, 160px); }
-.collage { position: relative; display: grid; place-items: center; padding-block: 24px; }
-@media (min-width: 1200px) { .collage { min-height: clamp(560px, 46vw, 680px); padding-block: 40px; } }
+.collage { position: relative; }
+.collage-stage {
+  position: relative; display: grid; place-items: center;
+  width: min(100% - 2 * var(--gutter), var(--max)); margin-inline: auto; padding-block: 24px;
+}
+@media (min-width: 1200px) { .collage-stage { min-height: clamp(560px, 46vw, 680px); padding-block: 40px; } }
 .collage .sec-head { position: relative; z-index: 2; margin-bottom: 0; }
 .big-key {
-  display: inline-grid; place-items: center; vertical-align: 0.06em;
+  position: relative; display: inline-grid; place-items: center; vertical-align: 0.06em;
   width: 1.25em; height: 1.12em; margin: 0 0.06em; border-radius: 0.2em;
-  background: #ffffff; border: 1px solid #e4e5ec; box-shadow: 0 0.06em 0 #d6d8e2, 0 14px 30px rgba(22, 18, 14, 0.08);
+  background: #ffffff; border: 1px solid #e4e5ec;
   font: 400 0.68em/1 var(--font-mono); color: #16120e; letter-spacing: 0;
 }
+/* The key's resting and pressed shadows, cross-faded by opacity (--press is set by the orbit in app.js). */
+.big-key::before, .big-key::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; }
+.big-key::before { box-shadow: 0 0.06em 0 #d6d8e2, 0 14px 30px rgba(22, 18, 14, 0.08); opacity: calc(1 - var(--press, 0)); }
+.big-key::after { box-shadow: 0 0.01em 0 #d6d8e2, 0 6px 14px rgba(22, 18, 14, 0.1); opacity: var(--press, 0); }
 .big-key.is-pressed { animation: big-key 0.6s var(--ease-out); }
-@keyframes big-key { 30% { transform: translateY(0.05em); box-shadow: 0 0.01em 0 #d6d8e2, 0 8px 18px rgba(22, 18, 14, 0.08); } }
+.big-key.is-pressed::before { animation: big-key-up 0.6s var(--ease-out); }
+.big-key.is-pressed::after { animation: big-key-down 0.6s var(--ease-out); }
+@keyframes big-key { 30% { transform: translateY(0.05em) scale(0.96); } }
+@keyframes big-key-up { 30% { opacity: 0; } }
+@keyframes big-key-down { 30% { opacity: 1; } }
 .bits { position: absolute; inset: 0; pointer-events: none; display: none; }
-.bit { position: absolute; will-change: transform; }
+.bit { position: absolute; }
 .bit-tile { border-radius: 18px; overflow: hidden; box-shadow: var(--shadow-soft); background: #cfc7b8; }
 .bit-tile .bit-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 /* Product moments on art, like lassie's photos with a UI chip on top. */
@@ -435,6 +450,44 @@ em { font-style: normal; }
   .b5 { left: 6%; bottom: 9%; }
   .b6 { right: 7%; bottom: 3%; width: 157px; height: 117px; }
   .b7 { right: 2%; bottom: 24%; }
+}
+/* The orbit: same media as orbitMQ in app.js. The section's height and the pinned stage only depend on
+   CSS, so nothing shifts when the script starts. The tiles wait unseen in the still layout until the
+   script adds .is-orbit and places each one from the stage centre with transform and opacity; if the
+   script never gets that far, the still collage fades in after a moment instead. */
+@media (min-width: 1200px) and (min-height: 620px) and (hover: hover) and (pointer: fine) {
+  .motion .collage { height: calc(100vh + 220vh); }
+  .motion .collage-stage {
+    position: sticky; top: 0; width: 100%; height: 100vh; min-height: 0;
+    padding: var(--nav-h) var(--gutter) 0; overflow: hidden; overflow: clip;
+  }
+  .motion .collage .bit { opacity: 0; animation: bit-fallback 0.6s var(--ease-out) 3.5s both; }
+  /* That fallback keeps the box of the still stage, centred on the headline and clear of the nav. */
+  .motion .collage .bits { animation: bits-fallback 0s 3.5s forwards; }
+  .motion .collage.is-orbit .bits { animation: none; }
+  .motion .collage.is-orbit .bit { animation: none; left: 50%; top: 50%; right: auto; bottom: auto; translate: -50% -50%; transform-origin: 50% 50%; }
+  .motion .collage.is-live .bit { will-change: transform, opacity; }
+  /* Around a full-screen stage the tiles are drawn a size up, at their real size rather than scaled. */
+  .motion .collage.is-orbit .b1 { width: 226px; height: 246px; }
+  .motion .collage.is-orbit .b2 { width: 276px; }
+  .motion .collage.is-orbit .b3 { width: 216px; height: 226px; }
+  .motion .collage.is-orbit .b6 { width: 184px; height: 138px; }
+  .motion .collage.is-orbit .bit-tile { border-radius: 20px; }
+  .motion .collage.is-orbit .m-word { font-size: 15.5px; padding: 10px 12px; }
+  .motion .collage.is-orbit .bit-ui { padding: 14px 16px; border-radius: 16px; font-size: 14px; }
+  .motion .collage.is-orbit .bit-ui .row { gap: 9px; }
+  .motion .collage.is-orbit .bit-ui .muted { font-size: 13px; }
+  .motion .collage.is-orbit .bit-ui .serif { font-size: 18.5px; }
+  .motion .collage.is-orbit .bit-input { gap: 9px; padding: 12px 14px; border-radius: 16px; font-size: 14px; }
+  .motion .collage.is-orbit .bit .key { min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px; font-size: 14.5px; }
+  .motion .collage.is-orbit .bit .key.word { font-size: 13.5px; }
+}
+@keyframes bit-fallback { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bits-fallback {
+  from, to {
+    inset: auto; left: 50%; top: calc(50% + var(--nav-h) / 2); translate: -50% -50%;
+    width: min(100% - 2 * var(--gutter), var(--max)); height: min(clamp(560px, 46vw, 680px), 100vh - var(--nav-h));
+  }
 }
 
 /* Ways: story. Stacked by default; pinned on wide screens when motion is allowed. */
@@ -965,10 +1018,10 @@ em { font-style: normal; }
 }
 .foot-word { position: relative; z-index: 0; margin-top: calc(-1 * clamp(28px, 4vw, 48px)); padding-top: clamp(28px, 4vw, 48px); overflow: hidden;
   background: linear-gradient(180deg, #e8e5f6 0%, #dad9f4 40%, #cfe0f3 100%); }
-@media (max-width: 719px) { .foot-word span { font-size: 46vw !important; } }
+@media (max-width: 719px) { .foot-word span { font-size: 30vw !important; } }
 .foot-word span {
   display: block; text-align: center; color: #ffffff; font-family: var(--font-display); font-weight: 300;
-  font-size: clamp(170px, 44vw, 640px); line-height: 1; letter-spacing: 0; margin-bottom: -0.04em; padding-top: 0.02em;
+  font-size: clamp(110px, 21vw, 300px); line-height: 1; letter-spacing: 0.04em; padding: 0.04em 0 0.1em;
   will-change: transform;
 }
 
@@ -1063,8 +1116,9 @@ em { font-style: normal; }
   </div>
 </section>
 <section class="ways cv" id="ways" aria-labelledby="ways-title">
-  <div class="collage wrap">
-    <div class="bits" aria-hidden="true">
+  <div class="collage" id="collage">
+    <div class="collage-stage">
+      <div class="bits" aria-hidden="true">
       <div class="bit bit-tile b1" data-speed="-0.12"><img class="bit-art" src="assets/art-ways-1.jpg" alt="" width="1800" height="1240" loading="lazy" decoding="async" draggable="false"><div class="moment m-word"><span lang="en">keep the <mark>thread<span class="ptr"><svg viewBox="0 0 15 20" aria-hidden="true"><path d="M1.2 1.2v15.2l3.9-3.7 2.6 5.9 2.6-1.1-2.6-5.8h5.4z" fill="#111111" stroke="#ffffff" stroke-width="1.3" stroke-linejoin="round"/></svg></span></mark> of</span></div></div>
       <div class="bit bit-ui b2" data-speed="0.08"><div class="row"><kbd class="key">⌥</kbd><span class="serif" lang="en">thread</span></div><p class="muted" style="margin-top:6px">思路，脉络 · 论证一步步展开的线索</p></div>
       <div class="bit bit-tile b3" data-speed="-0.06"><img class="bit-art" src="assets/art-ways-2.jpg" alt="" width="1800" height="1240" loading="lazy" decoding="async" draggable="false"><div class="moment m-region"><div class="mcols"><span><i style='width:94%'></i><i style='width:82%'></i><i style='width:90%'></i><i style='width:60%'></i></span><span><i style='width:88%'></i><i style='width:96%'></i><i style='width:74%'></i><i style='width:84%'></i></span></div><b class="box"></b><span class="ptr"><svg viewBox="0 0 15 20" aria-hidden="true"><path d="M1.2 1.2v15.2l3.9-3.7 2.6 5.9 2.6-1.1-2.6-5.8h5.4z" fill="#111111" stroke="#ffffff" stroke-width="1.3" stroke-linejoin="round"/></svg></span></div></div>
@@ -1073,11 +1127,12 @@ em { font-style: normal; }
       <div class="bit bit-tile b6" data-speed="0.1"><img class="bit-art" src="assets/art-ways-4.jpg" alt="" width="1800" height="1240" loading="lazy" decoding="async" draggable="false"></div>
       <div class="bit bit-input b7" data-speed="-0.1"><span>输入要翻译的文字…</span><span class="keys"><kbd class="key">⌥</kbd><kbd class="key">I</kbd></span></div>
     </div>
-    <header class="sec-head">
-      <p class="kicker" data-reveal>四种取词</p>
-      <h2 class="display h-statement" id="ways-title" data-reveal>都从 <kbd class="big-key" id="big-key">⌥</kbd> 开始</h2>
-      <p class="lede" data-reveal>单词、整段、选中的文字，或者你自己输入的一句话，都有对应的快捷键。</p>
-    </header>
+      <header class="sec-head">
+        <p class="kicker" data-reveal>四种取词</p>
+        <h2 class="display h-statement" id="ways-title" data-reveal>都从 <kbd class="big-key" id="big-key">⌥</kbd> 开始</h2>
+        <p class="lede" data-reveal>单词、整段、选中的文字，或者你自己输入的一句话，都有对应的快捷键。</p>
+      </header>
+    </div>
   </div>
   <div class="story" id="story">
     <div class="story-track">
@@ -1386,6 +1441,8 @@ em { font-style: normal; }
   var dockMQ = mq("(min-width: 900px)");
   var fineMQ = mq("(hover: hover) and (pointer: fine)");
   var narrowMQ = mq("(max-width: 719px)");
+  // Same media as the orbit block in style.css.
+  var orbitMQ = mq("(min-width: 1200px) and (min-height: 620px) and (hover: hover) and (pointer: fine)");
   var motion = root.classList.contains("motion");
   var EASE_OUT = "cubic-bezier(0.22, 1, 0.36, 1)";
   var EASE_IO = "cubic-bezier(0.65, 0, 0.35, 1)";
@@ -2046,11 +2103,213 @@ em { font-style: normal; }
   /* ------------------------------------------------------------ Scroll: one rAF loop for everything scroll-linked */
   var scroll = (function () {
     var nav = $("#nav"), hero = $(".hero"), media = $(".hero-media"), img = $(".hero-media img"), inner = $(".hero-inner");
-    var collage = $(".collage"), bits = $$(".bit"), foot = $(".foot-word"), word = $(".foot-word span");
+    var collage = $("#collage"), stage = $(".collage-stage"), head = $(".collage .sec-head"), bits = $$(".bit");
+    var foot = $(".foot-word"), word = $(".foot-word span");
     var key = $("#big-key");
     var m = { vh: 1, vw: 1, heroH: 1, colTop: 0, colH: 0, footTop: 0, footH: 1 };
     var last = {}, ticking = false, scrolled = null, keyPressed = false;
     var speeds = bits.map(function (b) { return parseFloat(b.getAttribute("data-speed")) || 0; });
+
+    /* The ways collage as an orbit. The stage is pinned by CSS; here every tile gets one transform and
+       one opacity per frame. Angles are in screen space (y points down), so a growing angle turns
+       clockwise: 0 is right of the headline, 90 below it, 270 above it. */
+    var D2R = Math.PI / 180, TAU = Math.PI * 2, NS = 180;
+    // Two streams leave the key: up and round the right, down and round the left. The tiles that leave
+    // straight up or down (and so read as coming out of the headline) go first; the ones that curl
+    // round to the sides go last and leave on a slant, so no tile has far to travel.
+    var PATHS = [ // per tile, in DOM order: angle once all are out, radius share, speed share, spawn order
+      { a: 165, r: 1.0, w: 1.0, s: 4 },   // b1  snippet on art
+      { a: 112, r: 0.97, w: 1.0, s: 1 },  // b2  word card
+      { a: 272, r: 1.0, w: 1.0, s: 3 },   // b3  region box on art
+      { a: 315, r: 0.92, w: 1.0, s: 0 },  // b4  ⌥ S
+      { a: 230, r: 0.92, w: 1.0, s: 5 },  // b5  ⌥ 拖动
+      { a: 22, r: 1.0, w: 1.0, s: 2 },    // b6  art
+      { a: 72, r: 0.94, w: 0.8, s: 6 }    // b7  input field
+    ];
+    // Spawn: each tile flies for ARR of the progress, STAGGER after the one before, curling clockwise
+    // from its exit by at most SWEEP; all are out by SETTLE. Hold: the set travels TRAVEL px along its
+    // ellipses (same speed everywhere, so the gaps between tiles keep) and slows to rest by the end of
+    // the pin. The orbit starts LEAD before SETTLE, while the tiles are still flying out, so the spawn
+    // runs on into the orbit without a pause.
+    var SETTLE = 0.4, ARR = 0.34, STAGGER = 0.01, SWEEP = 90 * D2R, GAP = 36;
+    var TRAVEL = 340, LEAD = 0.2, DECAY = 1.5;
+    var PRE = LEAD / 2, POST = (1 - SETTLE) / (DECAY + 1);
+    var ob = { on: false, live: false, cur: -1, lastY: -1, t: 0, tiles: [], press: "" };
+    function sm(t) { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); }
+    // Arc length travelled by the set at progress p, in px at K = 1: negative before SETTLE, 0 at it.
+    function travel(p) {
+      var d;
+      if (p <= SETTLE - LEAD) d = 0;
+      else if (p < SETTLE) { var t = (p - SETTLE + LEAD) / LEAD; d = LEAD * (t * t * t - t * t * t * t / 2); }
+      else d = PRE + POST * (1 - Math.pow(1 - Math.min((p - SETTLE) / (1 - SETTLE), 1), DECAY + 1));
+      return TRAVEL * (d - PRE) / POST;
+    }
+    // Arc length along a tile's ellipse, tabulated once per measure, and its inverse.
+    function arcTable(rx, ry) {
+      var S = [0], h = TAU / NS;
+      for (var i = 1; i <= NS; i++) { var t = (i - 0.5) * h; S.push(S[i - 1] + h * Math.sqrt(rx * rx * Math.sin(t) * Math.sin(t) + ry * ry * Math.cos(t) * Math.cos(t))); }
+      return S;
+    }
+    function arcAt(S, th) {
+      var n = Math.floor(th / TAU), f = (th - n * TAU) / TAU * NS, i = Math.min(Math.floor(f), NS - 1);
+      return n * S[NS] + S[i] + (S[i + 1] - S[i]) * (f - i);
+    }
+    function angleAt(S, s) {
+      var n = Math.floor(s / S[NS]), r = s - n * S[NS], lo = 0, hi = NS;
+      while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (S[mid] <= r) lo = mid; else hi = mid; }
+      return (n + (lo + (r - S[lo]) / (S[lo + 1] - S[lo])) / NS) * TAU;
+    }
+
+    function measureOrbit() {
+      var was = ob.on;
+      ob.on = motion && orbitMQ.matches && !!(collage && stage && head && key && bits.length);
+      if (was && !ob.on) clearOrbit();
+      if (!ob.on) return;
+      // The orbit layout (tile sizes and the centred origin) only applies once the script runs it.
+      collage.classList.add("is-orbit");
+      var W = stage.clientWidth, H = stage.clientHeight, sl = stage.getBoundingClientRect().left;
+      // The text block: line boxes give its width (balanced lines are narrower than their boxes),
+      // layout offsets give its height (a reveal may still be moving it).
+      var l = Infinity, r = -Infinity, t = Infinity, b = -Infinity, range = document.createRange();
+      Array.prototype.forEach.call(head.children, function (c) {
+        range.selectNodeContents(c);
+        var rr = range.getBoundingClientRect(), top = head.offsetTop + c.offsetTop;
+        if (rr.width) { l = Math.min(l, rr.left - sl); r = Math.max(r, rr.right - sl); }
+        t = Math.min(t, top); b = Math.max(b, top + c.offsetHeight);
+      });
+      if (!(r > l)) { l = head.offsetLeft; r = l + head.offsetWidth; }
+      // The composition is drawn for 1440 × 880 and scales with the stage, a little either way.
+      var K = clamp(Math.min(W / 1440, H / 880), 0.82, 1.16), pad = parseFloat(getComputedStyle(stage).paddingTop) || 0;
+      m.W = W; m.H = H; m.K = K;
+      m.cx = (l + r) / 2; m.cy = (t + b) / 2; m.tA = (r - l) / 2; m.tB = (b - t) / 2;
+      // The key's layout position in the stage. While the headline's reveal is still moving it, the
+      // headline (transformed) is the key's offsetParent, so walk the whole chain up to the stage.
+      var kx = key.offsetWidth / 2, ky = key.offsetHeight / 2;
+      for (var o = key; o && o !== stage; o = o.offsetParent) { kx += o.offsetLeft; ky += o.offsetTop; }
+      m.kx = kx; m.ky = ky;
+      m.top = pad - 8; m.edge = 20;
+      var up = m.cy - m.top, down = H - m.edge - m.cy, side = Math.min(m.cx, W - m.cx) - m.edge;
+      ob.tiles = bits.map(function (el, i) {
+        var P = PATHS[i % PATHS.length], hw = el.offsetWidth / 2, hh = el.offsetHeight / 2;
+        // Each tile keeps its own ellipse, small enough that the full-size tile never meets an edge.
+        var rx = Math.min(Math.min(0.4 * W, 600 * K) * P.r, side - hw * K * 1.05);
+        var ry = Math.min(Math.min(0.34 * H, 320 * K) * P.r, up - hh * K * 0.95, down - hh * K * 1.05);
+        // It leaves the key straight up (right half) or straight down (left half).
+        var sweep = ((P.a - (P.a > 90 && P.a <= 270 ? 90 : 270)) % 360 + 360) % 360;
+        var S = arcTable(rx, ry);
+        var T = {
+          el: el, th: P.a * D2R, w: P.w, s: P.s * STAGGER, from: (P.a - Math.min(sweep, SWEEP / D2R)) * D2R,
+          S: S, s0: arcAt(S, P.a * D2R), hw: hw, hh: hh, rx: rx, ry: ry, e0: 1, fw: 0.28, tf: "", op: ""
+        };
+        // If the orbit has not yet carried the tile's place round past its exit when it sets off, it leaves
+        // towards that place instead, so it never has to back up.
+        T.from = Math.min(T.from, angleAt(S, T.s0 + travel(T.s) * K * T.w));
+        // How far out the tile is when it first clears the text: it fades in from there.
+        for (var j = 0; j <= 64; j++) { pose(T, T.s + ARR * j / 64); if (Q.free >= 1) { T.e0 = Q.e; break; } }
+        T.fw = Math.max(0.05, Math.min(0.28, 0.95 - T.e0));
+        return T;
+      });
+      // Scroll positions: tiles start to spawn just before the stage pins, are all out by SETTLE, and
+      // come to rest as the pin lets go.
+      m.oStart = m.colTop - m.vh * 0.2;
+      m.oEnd = m.colTop + m.colH - m.vh;
+      m.oSpan = Math.max(1, m.oEnd - m.oStart);
+      ob.cur = -1;
+    }
+    // Where tile T is at progress p, in stage px, written to Q.
+    var Q = {};
+    function pose(T, p) {
+      // Out from the key first, round into place after: the radius leads, the angle follows (e^1.3).
+      var a = clamp((p - T.s) / ARR, 0, 1), e = 1 - Math.pow(1 - a, 2.4);
+      var goal = angleAt(T.S, T.s0 + travel(p) * m.K * T.w);
+      var th = T.from + Math.max(0, goal - T.from) * Math.pow(e, 1.3), c = Math.cos(th), s = Math.sin(th);
+      var depth = 0.985 + 0.065 * s, full = m.K * depth, sc = full * (0.25 + 0.75 * sm(a));
+      var ex = T.rx * c, ey = T.ry * s;
+      // Push the point out along its ray if the full-size tile would come near the headline.
+      var need = Math.min((m.tA + T.hw * full + GAP) / (Math.abs(ex) || 1e-6), (m.tB + T.hh * full + GAP) / (Math.abs(ey) || 1e-6));
+      var R = need > 1 ? need * e : e;
+      var ha = T.hw * sc, hb = T.hh * sc;
+      Q.x = clamp(m.kx + (m.cx - m.kx) * e + ex * R, m.edge + ha, m.W - m.edge - ha);
+      Q.y = clamp(m.ky + (m.cy - m.ky) * e + ey * R, m.top + hb, m.H - m.edge - hb);
+      // 1 where the tile's edge meets the text block, more outside it.
+      Q.free = Math.max(Math.abs(Q.x - m.cx) / (m.tA + ha + 4), Math.abs(Q.y - m.cy) / (m.tB + hb + 4));
+      Q.e = e; Q.s = s; Q.sc = sc;
+    }
+    function clearOrbit() {
+      ob.live = false;
+      ob.cur = -1;
+      if (collage) collage.classList.remove("is-live", "is-orbit");
+      bits.forEach(function (b) { b.style.transform = ""; b.style.opacity = ""; });
+      ob.tiles.forEach(function (T) { T.tf = T.op = ""; });
+      if (key) { key.style.transform = ""; key.style.removeProperty("--press"); }
+      ob.press = "";
+    }
+    function placeOrbit(p, y) {
+      // Outside the pin the stage moves; tiles move a touch faster than the headline, nearer ones more.
+      var drift = y < m.colTop ? m.colTop - y : y > m.oEnd ? m.oEnd - y : 0;
+      for (var i = 0; i < ob.tiles.length; i++) {
+        var T = ob.tiles[i];
+        pose(T, p);
+        // A spawning tile is invisible while it is over the text, then fades up steadily as it flies on.
+        var op = sm((Q.e - T.e0) / T.fw) * sm((Q.free - 1) / 0.04);
+        var x = Q.x, yy = Q.y + drift * (0.06 + 0.04 * Q.s), sc = Q.sc;
+        var tf = "translate3d(" + (x - m.W / 2).toFixed(1) + "px," + (yy - m.H / 2).toFixed(1) + "px,0) scale(" + sc.toFixed(4) + ")";
+        var o = op.toFixed(3);
+        if (tf !== T.tf) { T.tf = tf; T.el.style.transform = tf; }
+        if (o !== T.op) { T.op = o; T.el.style.opacity = o; }
+      }
+      // Tapping ⌥ spawns the tiles: the key goes down as the first tile sets off and comes back up as it
+      // clears the headline. Scrolling back up plays it in reverse.
+      var a0 = clamp(p / ARR, 0, 1), k = sm(a0 / 0.12) * (1 - sm((a0 - 0.18) / 0.2));
+      var kp = k.toFixed(3);
+      if (kp !== ob.press) {
+        ob.press = kp;
+        key.style.transform = k ? "translate3d(0," + (3 * k * m.K).toFixed(2) + "px,0) scale(" + (1 - 0.06 * k).toFixed(4) + ")" : "";
+        key.style.setProperty("--press", kp);
+      }
+    }
+    // Returns true while the tiles are still easing towards the scroll position.
+    function orbitFrame(y, now) {
+      var near = y > m.colTop - m.vh * 1.05 && y < m.colTop + m.colH + 40;
+      if (near !== ob.live) { ob.live = near; collage.classList.toggle("is-live", near); }
+      var target = clamp((y - m.oStart) / m.oSpan, 0, 1);
+      // Only a jump of the page itself (an anchor, a key press, a resize) lands at once.
+      var jump = ob.lastY < 0 || Math.abs(y - ob.lastY) > m.vh * 0.8;
+      ob.lastY = y;
+      if (!near) { ob.cur = target; ob.t = 0; return false; }
+      var dt = ob.t ? clamp(now - ob.t, 1, 64) : 16;
+      ob.t = now;
+      // Otherwise a light lag smooths wheel steps into a glide. It never trails by more than about two
+      // wheel notches (0.3 of a screen), so a fast fling moves the tiles with the page instead of
+      // letting them fall behind and jump.
+      var lag = m.vh * 0.3 / m.oSpan;
+      if (ob.cur < 0 || jump) ob.cur = target;
+      else ob.cur = clamp(ob.cur + (target - ob.cur) * (1 - Math.exp(-dt / 90)), target - lag, target + lag);
+      if (Math.abs(target - ob.cur) < 0.0004) ob.cur = target;
+      placeOrbit(ob.cur, y);
+      if (ob.cur === target) { ob.t = 0; return false; }
+      return true;
+    }
+    // Where the visitor is in the collage, so a change of motion setting can keep them there.
+    function spot() {
+      var y = window.pageYOffset || 0, mid = y + m.vh / 2;
+      if (!collage || mid < m.colTop || mid > m.colTop + m.colH) return null;
+      return { orbit: ob.on, p: ob.on ? clamp((y - m.oStart) / m.oSpan, 0, 1) : SETTLE };
+    }
+    // Under reduced motion every change runs as a 1 ms transition (style.css), sizes included: finish the
+    // collage's at once, so it can be measured at its new size.
+    function settle() {
+      if (!collage || !collage.getAnimations) return;
+      collage.getAnimations({ subtree: true }).forEach(function (a) { if (a.transitionProperty) a.finish(); });
+    }
+    function keep(sp) {
+      if (!sp || !collage) return;
+      // Into the orbit: the same point of it (all tiles out, if coming from the still collage).
+      // Out of it: the still collage, centred.
+      var y = ob.on ? m.oStart + m.oSpan * sp.p : m.colTop + m.colH / 2 - m.vh / 2;
+      ob.lastY = -1;
+      window.scrollTo(0, Math.max(0, Math.round(y)));
+    }
 
     function measure() {
       m.vh = window.innerHeight || 1;
@@ -2058,9 +2317,13 @@ em { font-style: normal; }
       m.heroH = hero ? hero.offsetHeight : 1;
       if (collage) { m.colTop = pageTop(collage); m.colH = collage.offsetHeight; }
       if (foot) { m.footTop = pageTop(foot); m.footH = foot.offsetHeight; }
+      var wasOrbit = ob.on;
+      measureOrbit();
+      // Switching between the orbit and the still collage: the other mode writes its transforms afresh.
+      if (wasOrbit !== ob.on) last.c = undefined;
       story.measure();
     }
-    function frame() {
+    function frame(now) {
       ticking = false;
       var y = window.pageYOffset || 0;
       var s = y > m.heroH - 90;
@@ -2079,7 +2342,9 @@ em { font-style: normal; }
           inner.style.transform = p ? "translate3d(0," + (y * -0.12).toFixed(1) + "px,0)" : "";
         }
       }
-      if (collage && bits.length) {
+      if (ob.on) {
+        if (orbitFrame(y, now || performance.now())) request();
+      } else if (collage && bits.length) {
         var c = (y + m.vh / 2) - (m.colTop + m.colH / 2);
         if (Math.abs(c) < m.vh * 1.5 && c !== last.c) {
           last.c = c;
@@ -2098,11 +2363,12 @@ em { font-style: normal; }
       if (media) media.style.clipPath = "";
       if (img) img.style.transform = "";
       if (inner) { inner.style.opacity = ""; inner.style.transform = ""; }
-      bits.forEach(function (b) { b.style.transform = ""; });
+      clearOrbit();
       if (word) word.style.transform = "";
     }
     measure();
     frame();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { measure(); request(); });
     window.addEventListener("scroll", request, { passive: true });
     window.addEventListener("resize", function () { measure(); request(); if (demo) demo.place(); }, { passive: true });
     window.addEventListener("load", function () { measure(); request(); if (demo) demo.place(); });
@@ -2110,7 +2376,7 @@ em { font-style: normal; }
       var ro = 0;
       new ResizeObserver(function () { cancelAnimationFrame(ro); ro = requestAnimationFrame(function () { measure(); request(); }); }).observe(document.body);
     }
-    return { request: request, reset: reset, measure: measure };
+    return { request: request, reset: reset, measure: measure, spot: spot, keep: keep, settle: settle };
   })();
 
   /* ------------------------------------------------------------ Reveal: below-the-fold content rises in once */
@@ -2186,15 +2452,20 @@ em { font-style: normal; }
 
   // Reduced motion, followed live: everything shows, scroll-linked transforms stop, the story stacks.
   listen(reduceMQ, function () {
+    // The collage is 320vh tall while it orbits and one screen when still: a visitor inside it stays there.
+    var sp = scroll.spot();
     motion = !reduceMQ.matches && hasIO;
     root.classList.toggle("motion", motion);
     if (!motion) { if (reveal) reveal.all(); scroll.reset(); }
     live.schedule && live.schedule();
     if (demo) demo.schedule();
+    scroll.settle();
     scroll.measure();
+    scroll.keep(sp);
     scroll.request();
   });
   listen(wideMQ, function () { scroll.measure(); scroll.request(); });
+  listen(orbitMQ, function () { scroll.measure(); scroll.request(); });
   }
 
   // Initialise after the first frame has painted, so parsing, the first layout and this setup
