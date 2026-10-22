@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>悬译许可协议</title>
+<meta name="description" content="悬译 HoverLing 最终用户许可协议。">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f6fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16171c" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="assets/icon.png">
+<style>
+:root {
+  --paper: #f6f6fa;
+  --sunken: #eeeff8;
+  --surface: #ffffff;
+  --ink: #17181f;
+  --muted: #666977;
+  --faint: #a4a7b4;
+  --border: #e4e5ec;
+  --accent: #4b51e0;
+  --accent-soft: #edeefe;
+  --prominent: #4b51e0;
+  --on-prominent: #ffffff;
+  --marker: rgba(255, 226, 122, 0.78);
+  --header-bg: rgba(246, 246, 250, 0.86);
+  --font-display: ui-serif, "New York", "Songti SC", "Noto Serif SC", serif;
+  --font-body: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #16171c;
+    --sunken: #1b1c26;
+    --surface: #1f2027;
+    --ink: #eceef5;
+    --muted: #9a9dab;
+    --faint: #6c6f7c;
+    --border: #30323c;
+    --accent: #9097ff;
+    --accent-soft: #272a48;
+    --prominent: #5e64ec;
+    --on-prominent: #ffffff;
+    --marker: rgba(94, 100, 236, 0.45);
+    --header-bg: rgba(22, 23, 28, 0.86);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #16171c;
+  --sunken: #1b1c26;
+  --surface: #1f2027;
+  --ink: #eceef5;
+  --muted: #9a9dab;
+  --faint: #6c6f7c;
+  --border: #30323c;
+  --accent: #9097ff;
+  --accent-soft: #272a48;
+  --prominent: #5e64ec;
+  --on-prominent: #ffffff;
+  --marker: rgba(94, 100, 236, 0.45);
+  --header-bg: rgba(22, 23, 28, 0.86);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; z-index: 30;
+  height: env(safe-area-inset-top, 0px); background: var(--header-bg);
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.wrap {
+  width: 100%; max-width: 820px; margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (min-width: 700px) {
+  .wrap {
+    padding-left: max(32px, env(safe-area-inset-left, 0px));
+    padding-right: max(32px, env(safe-area-inset-right, 0px));
+  }
+}
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: var(--header-bg);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; }
+.brand {
+  display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.0625rem; white-space: nowrap;
+}
+.brand-mark {
+  position: relative; width: 30px; height: 30px; border-radius: 8px; flex: none;
+  display: grid; place-items: center; font: 700 15px/1 var(--font-display); color: transparent;
+}
+.brand-mark.is-missing { background: var(--prominent); color: var(--on-prominent); }
+.brand-mark img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.back { font-size: 0.8125rem; font-weight: 500; color: var(--muted); text-decoration: none; }
+.back:hover { color: var(--ink); }
+main { padding-block: clamp(36px, 6vw, 72px) clamp(48px, 8vw, 96px); }
+.doc { max-width: 40em; }
+.doc h1 {
+  font-family: var(--font-display); font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
+  line-height: 1.25; margin: 0 0 18px; text-wrap: balance;
+}
+.doc h2 {
+  font-family: var(--font-display); font-size: 1.25rem; line-height: 1.4;
+  margin: 36px 0 10px; text-wrap: balance;
+}
+.doc p, .doc ul { margin: 0 0 12px; }
+.doc ul { padding-left: 1.3em; }
+.doc li { margin-bottom: 6px; }
+.doc li::marker { color: var(--faint); }
+.doc strong { font-weight: 600; }
+.doc code {
+  font-family: var(--font-mono); font-size: 0.85em; padding: 0.1em 0.35em;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 5px;
+  overflow-wrap: anywhere;
+}
+.doc .note {
+  margin: 0 0 22px; padding: 12px 16px; border-radius: 12px;
+  background: var(--sunken); border: 1px solid var(--border); color: var(--muted); font-size: 0.875rem;
+}
+.doc .note p { margin: 0; }
+.doc .meta { color: var(--muted); font-size: 0.875rem; }
+.doc .meta .item { white-space: nowrap; }
+.ph {
+  color: var(--accent); background: var(--accent-soft); border-radius: 4px;
+  padding: 0 0.25em; font-size: 0.92em;
+}
+.foot { padding-block: 32px 44px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.8125rem; }
+.foot .wrap { display: grid; gap: 6px; }
+.foot-links { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 6px; }
+.foot-links a { color: var(--ink); text-decoration: none; font-weight: 500; }
+.foot-links a:hover, .foot-links a[aria-current="page"] { color: var(--accent); }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">悬<img src="assets/icon.png" alt="" width="30" height="30" onerror="this.hidden=true;this.parentNode.classList.add('is-missing')"></span>悬译 HoverLing</a>
+    <a class="back" href="index.html">返回首页</a>
+  </div>
+</header>
+<main>
+  <article class="wrap"><div class="doc">
+    <h1>悬译 HoverLing 最终用户许可协议（草稿）</h1>
+    <div class="note"><p>草稿，发布前请自行审阅或请专业人士审阅；方括号内容需要你填写。本文不构成法律意见。</p></div>
+    <p class="meta"><span class="item">最近更新：<span class="ph">[日期]</span></span>　　<span class="item">权利人：<span class="ph">[卖家名称]</span>（下称「我们」）</span>　　<span class="item">联系方式：<span class="ph">[邮箱 / 微信]</span></span></p>
+    <h2>1. 方案与许可</h2>
+    <ul>
+      <li><strong>免费版</strong>：无需付费即可使用 Apple 翻译、系统词典、生词本、复习和导出，以及少量内置「悬译 AI」额度。</li>
+      <li><strong>付费方案</strong>（标准版、高级版、买断版）：购买授权码后，我们授予你个人的、非独占、不可转让的许可，在<strong>同一位用户拥有或使用的最多 2 台 Mac</strong> 上使用该方案的功能。月付、年付授权码在到期日后自动回到免费版；买断版不设到期日。</li>
+      <li>永久授权包含的更新范围：<span class="ph">[以购买页面说明为准]</span>。</li>
+    </ul>
+    <h2>2. 悬译 AI 额度</h2>
+    <ul>
+      <li>内置「悬译 AI」由 DeepSeek 提供，通过我们的服务器转发。各方案的额度按天或按月重置，长文字消耗更多额度；用完后自动改用 Apple 翻译。</li>
+      <li>为保证服务稳定，我们可能对单次文字长度、请求频率和全站每日用量设上限，必要时可暂停服务进行维护。</li>
+      <li>我们可以调整各方案的额度与价格；已付费的当期按购买时的方案提供。悬译 AI 不承诺不间断可用，服务中断期间可改用 Apple 翻译或你自己的 API。</li>
+    </ul>
+    <h2>3. 禁止行为</h2>
+    <p>你不得：转售、出租、公开分享或在网络上发布授权码；破解、修改、反编译或绕过授权验证；以悬译为基础提供翻译服务或制作竞争产品。</p>
+    <h2>4. 第三方服务</h2>
+    <ul>
+      <li>Apple 系统翻译与 macOS 词典由 Apple 提供，适用 Apple 的条款。</li>
+      <li>内置「悬译 AI」的翻译由 DeepSeek 生成，经我们的服务器转发。</li>
+      <li>若你在付费方案中接入自己的 API（如 DeepSeek、通义千问、Claude），识别出的文字会用<strong>你自己的 API 密钥</strong>直接发送给该服务商，费用由该服务商向你收取，并适用其条款与隐私政策。我们不经手这些数据和费用。</li>
+      <li>悬译随附的开源组件（如 Tesseract OCR，Apache-2.0 许可）的许可文本位于应用包内 <code>Contents/Resources/OCRRuntime/Licenses</code>。</li>
+    </ul>
+    <h2>5. 翻译结果</h2>
+    <p>翻译、释义和识别结果由软件和第三方服务自动生成，可能不准确，请勿作为法律、医疗、财务等重要决定的唯一依据。</p>
+    <h2>6. 退款</h2>
+    <p><span class="ph">[以购买平台规则及购买页面说明为准，例如「购买后 7 天内未激活可退款」。]</span></p>
+    <h2>7. 免责与责任限制</h2>
+    <p>在法律允许的范围内，悬译按「现状」提供。我们对因使用或无法使用悬译造成的间接损失不承担责任；我们的全部责任以你为该授权实际支付的金额为限。</p>
+    <h2>8. 终止</h2>
+    <p>你违反本协议时，许可自动终止，我们可以停用对应的授权码。</p>
+    <h2>9. 适用法律</h2>
+    <p>本协议适用中华人民共和国法律（不含冲突法规则）。争议协商不成的，提交 <span class="ph">[卖家所在地]</span> 有管辖权的人民法院解决。</p>
+  </div></article>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <nav class="foot-links" aria-label="法律信息">
+      <a href="index.html">首页</a>
+      <a href="privacy.html">隐私政策</a>
+      <a href="eula.html" aria-current="page">许可协议</a>
+    </nav>
+    <p>悬译 AI 使用深度求索 DeepSeek 大模型（模型备案号：<span class="ph">[DeepSeek 备案号]</span>）</p>
+    <p>本服务登记号：<span class="ph">[登记号]</span></p>
+    <p>© 2026 悬译 HoverLing</p>
+  </div>
+</footer>
+</body>
+</html>

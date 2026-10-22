@@ -1,0 +1,1144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>悬译 HoverLing</title>
+<meta name="description" content="悬译 HoverLing：指哪译哪的 Mac 阅读助手。把鼠标停在单词上，轻按 ⌥，释义就出现在旁边。">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f6fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16171c" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="assets/icon.png">
+<style>
+/* Layout: a reading desk. Lavender paper, one document window in the hero with the
+   app's word card set right under the word you point at; sections read like a tidy notebook. */
+:root {
+  --paper: #f6f6fa;
+  --sunken: #eeeff8;
+  --surface: #ffffff;
+  --raised: #fbfbfd;
+  --ink: #17181f;
+  --muted: #666977;
+  --faint: #a4a7b4;
+  --border: #e4e5ec;
+  --accent: #4b51e0;
+  --accent-soft: #edeefe;
+  --prominent: #4b51e0;
+  --prominent-hover: #3d43c9;
+  --on-prominent: #ffffff;
+  --marker: rgba(255, 226, 122, 0.78);
+  --shadow: rgba(30, 32, 64, 0.08);
+  --shadow-strong: rgba(30, 32, 64, 0.16);
+  --header-bg: rgba(246, 246, 250, 0.86);
+
+  --font-display: ui-serif, "New York", "Songti SC", "Noto Serif SC", serif;
+  --font-body: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --step--1: 0.8125rem;
+  --step-0: 0.9375rem;
+  --step-1: 1.0625rem;
+  --step-2: 1.25rem;
+  --step-3: clamp(1.5rem, 1.2rem + 1.2vw, 2.125rem);
+  --step-4: clamp(2.5rem, 1.5rem + 4.2vw, 4.5rem);
+
+  --radius: 14px;
+  --wrap: 1160px;
+  --header-h: 60px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #16171c;
+    --sunken: #1b1c26;
+    --surface: #1f2027;
+    --raised: #25262e;
+    --ink: #eceef5;
+    --muted: #9a9dab;
+    --faint: #6c6f7c;
+    --border: #30323c;
+    --accent: #9097ff;
+    --accent-soft: #272a48;
+    --prominent: #5e64ec;
+    --prominent-hover: #6e74f2;
+    --on-prominent: #ffffff;
+    --marker: rgba(94, 100, 236, 0.45);
+    --shadow: rgba(0, 0, 0, 0.28);
+    --shadow-strong: rgba(0, 0, 0, 0.5);
+    --header-bg: rgba(22, 23, 28, 0.86);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #16171c;
+  --sunken: #1b1c26;
+  --surface: #1f2027;
+  --raised: #25262e;
+  --ink: #eceef5;
+  --muted: #9a9dab;
+  --faint: #6c6f7c;
+  --border: #30323c;
+  --accent: #9097ff;
+  --accent-soft: #272a48;
+  --prominent: #5e64ec;
+  --prominent-hover: #6e74f2;
+  --on-prominent: #ffffff;
+  --marker: rgba(94, 100, 236, 0.45);
+  --shadow: rgba(0, 0, 0, 0.28);
+  --shadow-strong: rgba(0, 0, 0, 0.5);
+  --header-bg: rgba(22, 23, 28, 0.86);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 30;
+  background: var(--header-bg);
+}
+img { max-width: 100%; display: block; }
+a { color: var(--accent); text-underline-offset: 3px; }
+h1, h2, h3 { font-family: var(--font-display); color: var(--ink); text-wrap: balance; margin: 0; }
+p { margin: 0; text-wrap: pretty; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+[hidden] { display: none !important; }
+section[id], footer[id] { scroll-margin-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 8px); }
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--wrap) + 64px);
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (min-width: 700px) {
+  .wrap {
+    padding-left: max(32px, env(safe-area-inset-left, 0px));
+    padding-right: max(32px, env(safe-area-inset-right, 0px));
+  }
+}
+
+.skip {
+  position: absolute; left: 16px; top: -48px; z-index: 50;
+  background: var(--surface); color: var(--ink); padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.skip:focus { top: calc(8px + env(safe-area-inset-top, 0px)); }
+
+/* Highlighter: the yellow marker from the app logo, drawn under a phrase. */
+.mark {
+  background-image: linear-gradient(var(--marker), var(--marker));
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  background-size: 100% 0.38em;
+  padding-inline: 0.04em;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mark { animation: draw 0.7s ease-out; }
+}
+@keyframes draw { from { background-size: 0 0.38em; } }
+
+/* Keycaps, as in the app's KeyCap. */
+.key {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.95em; padding: 0.12em 0.48em;
+  font-family: var(--font-mono); font-size: 0.86em; font-weight: 500; line-height: 1.35;
+  color: var(--ink); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 6px;
+  box-shadow: 0 1.5px 0 var(--border);
+  vertical-align: 0.06em;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background-color 0.12s;
+}
+.key.is-pressed { animation: keypress 0.42s ease-out; }
+@keyframes keypress {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(1.5px); box-shadow: 0 0 0 var(--border); background: var(--accent-soft); }
+  100% { transform: translateY(0); }
+}
+.keys { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.keys .plus { color: var(--muted); font-size: var(--step--1); }
+
+.ph {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 4px;
+  padding: 0 0.25em;
+  font-size: 0.92em;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 10px 20px;
+  border-radius: 10px; border: 1px solid transparent;
+  font: 600 var(--step-0)/1.2 var(--font-body);
+  text-decoration: none; cursor: pointer;
+  transition: background-color 0.16s ease-out, border-color 0.16s ease-out, color 0.16s ease-out;
+}
+.btn-primary { background: var(--prominent); color: var(--on-prominent); }
+.btn-primary:hover { background: var(--prominent-hover); }
+.btn-quiet { background: var(--surface); color: var(--ink); border-color: var(--border); }
+.btn-quiet:hover { border-color: var(--faint); }
+.btn small { font-weight: 500; font-size: var(--step--1); }
+.btn[aria-disabled="true"] { cursor: default; }
+.btn-primary[aria-disabled="true"]:hover { background: var(--prominent); }
+
+/* Header */
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: var(--header-bg);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.top .wrap { display: flex; align-items: center; gap: 24px; min-height: var(--header-h); }
+.brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  color: var(--ink); text-decoration: none;
+  font-family: var(--font-display); font-weight: 700; font-size: var(--step-1);
+  white-space: nowrap;
+}
+.brand .en { font-family: var(--font-body); font-weight: 500; color: var(--muted); font-size: var(--step--1); }
+.brand-mark {
+  position: relative; flex: none; width: 30px; height: 30px; border-radius: 8px;
+  display: grid; place-items: center;
+  font: 700 15px/1 var(--font-display); color: transparent;
+}
+.brand-mark img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.brand-mark.is-missing { background: var(--prominent); color: var(--on-prominent); }
+.nav { display: flex; gap: 22px; margin-left: auto; }
+.nav a { color: var(--muted); text-decoration: none; font-size: var(--step--1); font-weight: 500; }
+.nav a:hover { color: var(--ink); }
+.top .btn { min-height: 36px; padding: 6px 14px; font-size: var(--step--1); }
+@media (max-width: 860px) {
+  .nav { display: none; }
+  .top .btn { margin-left: auto; }
+  .brand .en { display: none; }
+}
+
+/* Hero */
+.hero { padding-block: clamp(40px, 6vw, 84px) clamp(48px, 7vw, 96px); }
+.hero .wrap {
+  display: grid; gap: clamp(36px, 5vw, 64px);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+}
+@media (min-width: 1000px) {
+  .hero .wrap { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); align-items: start; }
+  .hero-copy { padding-top: clamp(24px, 5vw, 88px); }
+}
+.eyebrow {
+  font-size: var(--step--1); font-weight: 600; color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.hero-copy { display: grid; gap: 22px; min-width: 0; }
+.hero h1 {
+  font-size: var(--step-4); line-height: 1.12; font-weight: 700; letter-spacing: 0.02em;
+}
+.lede { font-size: var(--step-1); color: var(--muted); max-width: 34em; line-height: 1.8; }
+.lede .key { font-size: 0.82em; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; padding-top: 4px; }
+.hero-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: var(--step--1); }
+.hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.hero-meta span::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--faint); }
+
+/* The demo: a document window with lookup words and the app's word card. */
+.demo { min-width: 0; display: grid; gap: 12px; }
+.window {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px var(--shadow), 0 18px 48px var(--shadow);
+  min-width: 0;
+}
+.window-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; border-bottom: 1px solid var(--border);
+  font-size: var(--step--1); color: var(--muted);
+}
+.dots { display: inline-flex; gap: 7px; }
+.dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--border); }
+.window-title { flex: 1; text-align: center; padding-right: 47px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.window-body { padding: clamp(18px, 3vw, 30px) clamp(18px, 3vw, 32px) clamp(20px, 3vw, 32px); }
+.reading {
+  font-family: ui-serif, "New York", Georgia, "Songti SC", serif;
+  font-size: clamp(1.0625rem, 0.95rem + 0.45vw, 1.25rem);
+  line-height: 1.8;
+  color: var(--ink);
+  hyphens: manual;
+}
+.hw {
+  font: inherit; color: inherit; background: none; border: 0; padding: 0 0.06em; margin: 0;
+  cursor: pointer; border-radius: 3px;
+  text-decoration: underline dotted var(--accent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.22em;
+  background-image: linear-gradient(var(--marker), var(--marker));
+  background-repeat: no-repeat;
+  background-position: 0 86%;
+  background-size: 0 0.42em;
+  transition: background-size 0.28s ease-out;
+}
+.hw:hover { text-decoration-style: solid; }
+.hw.is-active { background-size: 100% 0.42em; text-decoration-color: transparent; }
+
+.card-slot {
+  --x: 0px;
+  --caret: 64px;
+  position: relative;
+  display: grid;
+  width: min(356px, 100%);
+  margin-top: 20px;
+  transform: translateX(var(--x));
+}
+.card-slot.is-ready { transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.25, 1); }
+.card-slot::before {
+  content: ""; position: absolute; z-index: 2;
+  top: -6px; left: calc(var(--caret) - 6px);
+  width: 12px; height: 12px;
+  background: var(--surface);
+  border-left: 1px solid var(--border); border-top: 1px solid var(--border);
+  border-top-left-radius: 3px;
+  transform: rotate(45deg);
+}
+.card-slot.is-ready::before { transition: left 0.3s cubic-bezier(0.2, 0.8, 0.25, 1); }
+.wcard {
+  grid-area: 1 / 1;
+  align-self: start;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px 18px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 2px 6px var(--shadow), 0 16px 36px var(--shadow-strong);
+  font-family: var(--font-body);
+  visibility: hidden; opacity: 0; transform: translateY(6px);
+  transition: opacity 0.18s ease-out, transform 0.24s ease-out, visibility 0s linear 0.24s;
+  min-width: 0;
+}
+.wcard.is-active { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
+/* All cards share one grid cell; the shown card fills it so the slot never reads as empty window. */
+.wcard.is-active { align-self: stretch; }
+.wc-word { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.wc-hw { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; line-height: 1.2; }
+.wc-lemma { color: var(--muted); font-size: 0.8125rem; }
+.wc-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.wc-lang { color: var(--muted); font-size: 0.75rem; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent);
+  font-size: 0.78rem; line-height: 1.5;
+}
+.chip b { font-weight: 600; font-size: 0.7rem; }
+.wc-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+.wc-ctx { display: grid; gap: 6px; padding: 12px; border-radius: 12px; background: var(--accent-soft); }
+.wc-ctx-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.wc-main { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; line-height: 1.35; }
+.pos { font-family: var(--font-body); font-style: italic; font-weight: 400; font-size: 0.75rem; color: var(--accent); }
+.wc-explain { font-family: var(--font-display); font-size: 0.9375rem; line-height: 1.6; }
+.wc-dict { display: grid; gap: 4px; }
+.wc-dict-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.wc-src { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--muted); }
+.wc-sense { display: grid; grid-template-columns: 2.4em minmax(0, 1fr); gap: 6px; font-size: 0.84rem; line-height: 1.55; }
+.wc-sense i { color: var(--muted); font-size: 0.75rem; }
+.wc-quote { margin: 0; padding-left: 11px; border-left: 2px solid var(--border); display: grid; gap: 4px; }
+.wc-quote p:first-child { font-size: 0.84rem; color: var(--muted); line-height: 1.55; }
+.wc-quote mark { background: var(--marker); color: var(--ink); font-weight: 600; border-radius: 2px; padding: 0 1px; }
+.wc-quote p + p { font-family: var(--font-display); font-size: 0.9rem; line-height: 1.55; }
+/* The app card's footer: 加入生词本 stays at the bottom however tall the slot is. */
+.wc-foot { margin-top: auto; display: flex; }
+.wc-save { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-size: 0.8125rem; font-weight: 600; line-height: 1.5; }
+.wc-save svg { flex: none; }
+
+.demo-hint { font-size: var(--step--1); color: var(--muted); padding-inline: 4px; line-height: 1.7; }
+.demo-hint .touch { display: none; }
+@media (hover: none) {
+  .demo-hint .pointer { display: none; }
+  .demo-hint .touch { display: inline; }
+}
+
+/* Sections */
+.section { padding-block: clamp(44px, 5.5vw, 76px); }
+.section-head { display: grid; gap: 12px; max-width: 46em; margin-bottom: clamp(28px, 4vw, 44px); }
+.section-head h2 { font-size: var(--step-3); line-height: 1.25; font-weight: 700; }
+.section-head p { color: var(--muted); font-size: var(--step-1); }
+.band-sunken { background: var(--sunken); border-block: 1px solid var(--border); }
+
+/* Ways */
+.ways { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.way {
+  display: grid; gap: 10px; align-content: start;
+  padding: 20px; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--border);
+  min-width: 0;
+}
+.way .keys { min-height: 30px; font-size: 1.0625rem; color: var(--muted); }
+.way .keys .word { font-size: var(--step--1); }
+.way h3 { font-size: var(--step-2); font-weight: 600; }
+.way p { color: var(--muted); }
+.ways-note { margin-top: 16px; color: var(--muted); font-size: var(--step--1); }
+
+/* Screenshot frames: fixed ratios so the layout holds before the images exist. */
+.shot {
+  position: relative; margin: 0;
+  max-width: 100%;
+  border-radius: 12px;
+  background: var(--raised);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.shot-frame { position: relative; aspect-ratio: 10 / 7; max-width: 100%; }
+.shot-frame.card-ratio { aspect-ratio: 38 / 43; }
+.shot-frame.plans-ratio { aspect-ratio: 152 / 83; }
+.shot-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.shot-missing {
+  position: absolute; inset: 0; display: none; place-items: center;
+  color: var(--faint); font-size: var(--step--1); text-align: center; padding: 16px;
+}
+.shot-frame.is-missing .shot-missing { display: grid; }
+:root .shot-frame.is-missing img { display: none !important; }
+.shot figcaption { padding: 10px 14px 12px; border-top: 1px solid var(--border); font-size: var(--step--1); color: var(--muted); background: var(--surface); }
+.only-dark { display: none !important; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .only-dark { display: block !important; }
+  :root:not([data-theme="light"]) .only-light { display: none !important; }
+}
+:root[data-theme="dark"] .only-dark { display: block !important; }
+:root[data-theme="dark"] .only-light { display: none !important; }
+.home-shot { margin-top: clamp(28px, 4vw, 44px); margin-inline: auto; max-width: 1000px; }
+
+/* Why */
+.why { display: grid; gap: clamp(28px, 4vw, 56px); grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 960px) {
+  .why { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); }
+  .why .shot { position: sticky; top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 24px); }
+}
+.reasons { display: grid; }
+.reason {
+  display: grid; grid-template-columns: 4.2em minmax(0, 1fr); gap: 4px 16px;
+  padding-block: 20px; border-top: 1px solid var(--border);
+}
+.reason:last-child { border-bottom: 1px solid var(--border); }
+.reason .glyph {
+  grid-row: span 2;
+  font-family: var(--font-display); font-weight: 700; color: var(--accent);
+  font-size: 1.75rem; line-height: 1.1; white-space: nowrap;
+}
+.reason .glyph.long { font-size: 1.125rem; line-height: 1.35; padding-top: 4px; }
+.reason h3 { font-size: var(--step-2); font-weight: 600; }
+.reason p { color: var(--muted); }
+.why .shot { width: 100%; max-width: 380px; justify-self: center; }
+.pair { display: grid; gap: 16px; margin-top: clamp(28px, 4vw, 44px); grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+
+/* AI services */
+.engines { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.engine {
+  display: grid; gap: 8px; align-content: start;
+  padding: 20px; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--border);
+}
+.engine.is-builtin { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.engine .tag { font-size: 0.75rem; font-weight: 600; color: var(--accent); }
+.engine h3 { font-size: var(--step-2); font-weight: 600; }
+.engine p { color: var(--muted); }
+.providers { margin-top: 28px; display: grid; gap: 18px; }
+.providers h3 { font-family: var(--font-body); font-size: var(--step-0); font-weight: 600; }
+.providers > p { color: var(--muted); max-width: 46em; }
+.groups { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+.group { display: grid; gap: 8px; align-content: start; }
+.group-name { font-size: var(--step--1); color: var(--muted); font-weight: 600; letter-spacing: 0.04em; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  display: inline-flex; padding: 5px 12px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--border);
+  font-size: var(--step--1); color: var(--ink);
+}
+
+/* Plans */
+.plans { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); align-items: stretch; }
+.plan {
+  position: relative;
+  display: grid; grid-template-rows: auto auto auto 1fr; gap: 12px;
+  padding: 22px 20px; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--border);
+  min-width: 0;
+}
+.plan.is-featured { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent), 0 12px 32px var(--shadow); }
+.plan-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.plan h3 { font-size: var(--step-2); font-weight: 700; }
+.badge { font-size: 0.75rem; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 2px 9px; border-radius: 999px; }
+.price { display: grid; gap: 2px; font-variant-numeric: tabular-nums; }
+.price strong { font-family: var(--font-display); font-size: 2rem; line-height: 1.15; font-weight: 700; }
+.price strong small { font-family: var(--font-body); font-size: var(--step--1); font-weight: 500; color: var(--muted); margin-left: 2px; }
+.price span { color: var(--muted); font-size: var(--step--1); }
+.plan-sum { color: var(--muted); font-size: var(--step--1); }
+@media (min-width: 600px) { .plan-sum { min-height: 3.4em; } }
+.ticks { display: grid; gap: 8px; align-content: start; border-top: 1px solid var(--border); padding-top: 14px; }
+.ticks li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; font-size: var(--step--1); line-height: 1.6; }
+.ticks li::before {
+  content: ""; width: 9px; height: 5px; margin-top: 0.55em; margin-left: 2px;
+  border-left: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
+  transform: rotate(-45deg);
+}
+.plan-notes { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--muted); font-size: var(--step--1); }
+.plan-notes li { display: inline-flex; align-items: baseline; gap: 8px; }
+.plan-notes li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--faint); transform: translateY(-2px); }
+.ring { display: inline-block; width: 0.95em; height: 0.95em; border-radius: 50%; vertical-align: -0.12em; background: conic-gradient(var(--accent) 0 62%, var(--border) 62% 100%); -webkit-mask: radial-gradient(circle, transparent 52%, #000 54%); mask: radial-gradient(circle, transparent 52%, #000 54%); }
+
+.buy {
+  scroll-margin-top: calc(var(--header-h) + env(safe-area-inset-top, 0px) + 8px);
+  margin-top: clamp(32px, 5vw, 56px);
+  display: grid; gap: clamp(24px, 4vw, 48px);
+  grid-template-columns: minmax(0, 1fr); align-items: center;
+}
+@media (min-width: 900px) { .buy { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.buy h3 { font-size: var(--step-2); font-weight: 700; margin-bottom: 14px; }
+.steps { display: grid; gap: 14px; counter-reset: step; }
+.steps li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: start; }
+.steps li::before {
+  counter-increment: step; content: counter(step);
+  width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center;
+  font: 600 0.8125rem/1 var(--font-body);
+  color: var(--accent); background: var(--accent-soft);
+}
+.steps p { color: var(--muted); }
+.steps strong { color: var(--ink); font-weight: 600; }
+
+/* FAQ */
+.faq-grid { display: grid; gap: 24px 56px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 960px) { .faq-grid { grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr); } }
+.faq-grid .section-head { margin-bottom: 0; align-content: start; }
+.faq { display: grid; border-top: 1px solid var(--border); }
+.faq details { border-bottom: 1px solid var(--border); }
+.faq summary {
+  list-style: none; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 18px 2px; font-weight: 600; font-size: var(--step-1);
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: ""; flex: none; width: 9px; height: 9px;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.2s ease-out;
+}
+.faq details[open] summary::after { transform: rotate(-135deg) translate(-2px, -2px); }
+.faq .answer { padding: 0 2px 20px; color: var(--muted); max-width: 40em; display: grid; gap: 8px; }
+
+/* Download */
+.download { background: var(--surface); border-top: 1px solid var(--border); }
+.dl-grid { display: grid; gap: clamp(28px, 4vw, 56px); grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 900px) { .dl-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.dl-grid .section-head { margin-bottom: 0; }
+.dl-grid .cta-row { padding-top: 12px; }
+.req { display: grid; border-top: 1px solid var(--border); }
+.req div { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 14px 2px; border-bottom: 1px solid var(--border); }
+.req dt { color: var(--muted); font-size: var(--step--1); }
+.req dd { margin: 0; }
+.req-title { font-family: var(--font-body); font-size: var(--step-0); font-weight: 600; margin-bottom: 10px; }
+
+/* Footer */
+.foot { padding-block: 40px 48px; border-top: 1px solid var(--border); color: var(--muted); font-size: var(--step--1); }
+.foot-grid { display: grid; gap: 22px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 860px) { .foot-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto; align-items: start; } }
+.foot .brand { font-size: var(--step-0); }
+.foot-tag { margin-top: 8px; }
+.foot-facts { display: grid; gap: 6px; }
+.foot-links { display: flex; gap: 18px; flex-wrap: wrap; }
+.foot-links a { color: var(--ink); text-decoration: none; font-weight: 500; }
+.foot-links a:hover { color: var(--accent); }
+.foot-legal { grid-column: 1 / -1; display: grid; gap: 4px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0s !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="悬译 HoverLing 首页">
+      <span class="brand-mark" aria-hidden="true">悬<img src="assets/icon.png" alt="" width="30" height="30"></span>
+      悬译 <span class="en">HoverLing</span>
+    </a>
+    <nav class="nav" aria-label="页面导航">
+      <a href="#ways">取词方式</a>
+      <a href="#why">为什么选悬译</a>
+      <a href="#ai">AI 服务</a>
+      <a href="#plans">方案与价格</a>
+      <a href="#faq">常见问题</a>
+    </nav>
+    <a class="btn btn-primary" href="#download">下载</a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top" aria-labelledby="hero-title">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="eyebrow">悬译 HoverLing · Mac 阅读助手</p>
+        <h1 id="hero-title">指哪，<span class="mark">译哪</span>。</h1>
+        <p class="lede">把鼠标停在单词上，轻按 <kbd class="key">⌥</kbd>，释义就出现在旁边。网页、PDF、App 界面、图片里的文字，指向就能翻，不用复制，也不用切换窗口。</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#download" data-download-link>下载 Mac 版<small>（即将开放）</small></a>
+          <a class="btn btn-quiet" href="#buy">购买授权码</a>
+        </div>
+        <p class="hero-meta"><span>免费版可直接使用</span><span>Apple Silicon</span><span>macOS 26 或以上</span></p>
+      </div>
+
+      <div class="demo">
+        <div class="window">
+          <div class="window-bar">
+            <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="window-title">On Reading Well · 示例文章</span>
+          </div>
+          <div class="window-body">
+            <p class="reading" id="demo-text" lang="en">Good readers are <button type="button" class="hw is-active" aria-pressed="true" data-card="card-resilient" aria-describedby="card-resilient">resilient</button>. They don’t stop at every unfamiliar word. They glance at its meaning and keep the <button type="button" class="hw" aria-pressed="false" data-card="card-thread" aria-describedby="card-thread">thread</button> of the argument <button type="button" class="hw" aria-pressed="false" data-card="card-intact" aria-describedby="card-intact">intact</button>. Over time, these small <button type="button" class="hw" aria-pressed="false" data-card="card-detours" aria-describedby="card-detours">detours</button> <button type="button" class="hw" aria-pressed="false" data-card="card-compound" aria-describedby="card-compound">compound</button> into a vocabulary of their own.</p>
+
+            <div class="card-slot" id="card-slot">
+              <article class="wcard is-active" id="card-resilient" aria-label="取词卡片：resilient">
+                <header>
+                  <div class="wc-word"><span class="wc-hw" lang="en">resilient</span></div>
+                  <div class="wc-meta"><span class="wc-lang">英语</span><span class="chip"><b>美</b> /rɪˈzɪliənt/</span><span class="chip"><b>英</b> /rɪˈzɪliənt/</span></div>
+                </header>
+                <div class="wc-ctx">
+                  <div class="wc-ctx-head"><p class="wc-label">语境释义</p><span class="wc-src">悬译 AI</span></div>
+                  <p class="wc-main"><i class="pos" lang="en">adj.</i>有韧性的</p>
+                  <p class="wc-explain">说好的读者碰到生词不会被打断，很快就能回到阅读里。</p>
+                </div>
+                <div class="wc-dict">
+                  <div class="wc-dict-head"><p class="wc-label">词典</p><span class="wc-src">英汉词典 · macOS</span></div>
+                  <p class="wc-sense"><i lang="en">adj.</i><span>有弹性的；能复原的；适应力强的</span></p>
+                </div>
+                <blockquote class="wc-quote">
+                  <p lang="en">Good readers are <mark>resilient</mark>.</p>
+                  <p>好的读者有韧性。</p>
+                </blockquote>
+                <p class="wc-foot" aria-hidden="true"><span class="wc-save"><svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M1.5 1h7v10L5 8.4 1.5 11z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>加入生词本</span></p>
+              </article>
+
+              <article class="wcard" id="card-thread" aria-label="取词卡片：thread">
+                <header>
+                  <div class="wc-word"><span class="wc-hw" lang="en">thread</span></div>
+                  <div class="wc-meta"><span class="wc-lang">英语</span><span class="chip"><b>美</b> /θred/</span><span class="chip"><b>英</b> /θred/</span></div>
+                </header>
+                <div class="wc-ctx">
+                  <div class="wc-ctx-head"><p class="wc-label">语境释义</p><span class="wc-src">悬译 AI</span></div>
+                  <p class="wc-main"><i class="pos" lang="en">n.</i>思路，脉络</p>
+                  <p class="wc-explain">the thread of the argument 指论证的思路，这里说查完词还能接上前文。</p>
+                </div>
+                <div class="wc-dict">
+                  <div class="wc-dict-head"><p class="wc-label">词典</p><span class="wc-src">英汉词典 · macOS</span></div>
+                  <p class="wc-sense"><i lang="en">n.</i><span>线；（故事、论证等的）脉络，思路</span></p>
+                </div>
+                <blockquote class="wc-quote">
+                  <p lang="en">They glance at its meaning and keep the <mark>thread</mark> of the argument intact.</p>
+                  <p>他们看一眼词义，论证的思路始终连贯。</p>
+                </blockquote>
+                <p class="wc-foot" aria-hidden="true"><span class="wc-save"><svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M1.5 1h7v10L5 8.4 1.5 11z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>加入生词本</span></p>
+              </article>
+
+              <article class="wcard" id="card-intact" aria-label="取词卡片：intact">
+                <header>
+                  <div class="wc-word"><span class="wc-hw" lang="en">intact</span></div>
+                  <div class="wc-meta"><span class="wc-lang">英语</span><span class="chip"><b>美</b> /ɪnˈtækt/</span><span class="chip"><b>英</b> /ɪnˈtækt/</span></div>
+                </header>
+                <div class="wc-ctx">
+                  <div class="wc-ctx-head"><p class="wc-label">语境释义</p><span class="wc-src">悬译 AI</span></div>
+                  <p class="wc-main"><i class="pos" lang="en">adj.</i>完整的，没有中断的</p>
+                  <p class="wc-explain">keep … intact 是让（思路）保持完整，不被打断。</p>
+                </div>
+                <div class="wc-dict">
+                  <div class="wc-dict-head"><p class="wc-label">词典</p><span class="wc-src">英汉词典 · macOS</span></div>
+                  <p class="wc-sense"><i lang="en">adj.</i><span>完好无损的；未受影响的</span></p>
+                </div>
+                <blockquote class="wc-quote">
+                  <p lang="en">They glance at its meaning and keep the thread of the argument <mark>intact</mark>.</p>
+                  <p>他们看一眼词义，论证的思路始终连贯。</p>
+                </blockquote>
+                <p class="wc-foot" aria-hidden="true"><span class="wc-save"><svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M1.5 1h7v10L5 8.4 1.5 11z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>加入生词本</span></p>
+              </article>
+
+              <article class="wcard" id="card-detours" aria-label="取词卡片：detours">
+                <header>
+                  <div class="wc-word"><span class="wc-hw" lang="en">detours</span><span class="wc-lemma" lang="en" title="词典原形">← detour</span></div>
+                  <div class="wc-meta"><span class="wc-lang">英语</span><span class="chip"><b>美</b> /ˈdiːtʊr/</span><span class="chip"><b>英</b> /ˈdiːtʊə/</span></div>
+                </header>
+                <div class="wc-ctx">
+                  <div class="wc-ctx-head"><p class="wc-label">语境释义</p><span class="wc-src">悬译 AI</span></div>
+                  <p class="wc-main"><i class="pos" lang="en">n.</i>小小的绕行</p>
+                  <p class="wc-explain">把每次停下来查词，比作阅读途中短暂地绕一下路。</p>
+                </div>
+                <div class="wc-dict">
+                  <div class="wc-dict-head"><p class="wc-label">词典</p><span class="wc-src">英汉词典 · macOS</span></div>
+                  <p class="wc-sense"><i lang="en">n.</i><span>绕行的路；绕道；迂回路线</span></p>
+                </div>
+                <blockquote class="wc-quote">
+                  <p lang="en">Over time, these small <mark>detours</mark> compound into a vocabulary of their own.</p>
+                  <p>日积月累，这些小小的绕行汇成自己的词汇。</p>
+                </blockquote>
+                <p class="wc-foot" aria-hidden="true"><span class="wc-save"><svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M1.5 1h7v10L5 8.4 1.5 11z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>加入生词本</span></p>
+              </article>
+
+              <article class="wcard" id="card-compound" aria-label="取词卡片：compound">
+                <header>
+                  <div class="wc-word"><span class="wc-hw" lang="en">compound</span></div>
+                  <div class="wc-meta"><span class="wc-lang">英语</span><span class="chip"><b>美</b> /kəmˈpaʊnd/</span><span class="chip"><b>英</b> /kəmˈpaʊnd/</span></div>
+                </header>
+                <div class="wc-ctx">
+                  <div class="wc-ctx-head"><p class="wc-label">语境释义</p><span class="wc-src">悬译 AI</span></div>
+                  <p class="wc-main"><i class="pos" lang="en">v.</i>逐渐累积</p>
+                  <p class="wc-explain">compound into 是一点点叠加成，像利滚利一样越积越多。</p>
+                </div>
+                <div class="wc-dict">
+                  <div class="wc-dict-head"><p class="wc-label">词典</p><span class="wc-src">英汉词典 · macOS</span></div>
+                  <p class="wc-sense"><i lang="en">v.</i><span>使加重；使复杂化；按复利计算</span></p>
+                </div>
+                <blockquote class="wc-quote">
+                  <p lang="en">Over time, these small detours <mark>compound</mark> into a vocabulary of their own.</p>
+                  <p>日积月累，这些小小的绕行汇成自己的词汇。</p>
+                </blockquote>
+                <p class="wc-foot" aria-hidden="true"><span class="wc-save"><svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M1.5 1h7v10L5 8.4 1.5 11z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>加入生词本</span></p>
+              </article>
+            </div>
+          </div>
+        </div>
+        <p class="demo-hint"><span class="pointer">网页演示：指针移到虚线单词上。</span><span class="touch">网页演示：点一下虚线单词。</span>在 Mac 上是指向单词后轻按 <kbd class="key" id="demo-key">⌥</kbd>。卡片为预置示例。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="ways" aria-labelledby="ways-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">取词方式</p>
+        <h2 id="ways-title">四种取词，都从 ⌥ 开始</h2>
+        <p>单词、整段、选中的文字，或者你自己输入的一句话，都有对应的快捷键。</p>
+      </div>
+      <ul class="ways">
+        <li class="way">
+          <span class="keys"><span class="word">指向单词，轻按</span><kbd class="key">⌥</kbd></span>
+          <h3>悬停取词</h3>
+          <p>音标、词性和词典释义即时显示，AI 再补充这个词在当前句子里的意思。</p>
+        </li>
+        <li class="way">
+          <span class="keys"><span class="word">按住</span><kbd class="key">⌥</kbd><span class="word">拖一个框</span></span>
+          <h3>框选翻译</h3>
+          <p>截图在本机识别，折行和分栏会整理成通顺的段落再翻译。</p>
+        </li>
+        <li class="way">
+          <span class="keys"><span class="word">选中文字后按</span><kbd class="key">⌥</kbd><kbd class="key">S</kbd></span>
+          <h3>选中翻译</h3>
+          <p>在任意 App 里选中一段文字，直接翻译。</p>
+        </li>
+        <li class="way">
+          <span class="keys"><kbd class="key">⌥</kbd><kbd class="key">I</kbd></span>
+          <h3>输入翻译</h3>
+          <p>打开输入窗，输入或粘贴文字，按 Return 翻译。</p>
+        </li>
+      </ul>
+      <p class="ways-note">快捷键都可以在设置里修改，也能一键恢复默认。</p>
+
+      <figure class="shot home-shot">
+        <div class="shot-frame">
+          <img class="only-light" src="assets/app-home-light.png" alt="悬译主窗口的首页（浅色外观）" width="2000" height="1400" loading="lazy" decoding="async">
+          <img class="only-dark" src="assets/app-home-dark.png" alt="悬译主窗口的首页（深色外观）" width="2000" height="1400" loading="lazy" decoding="async">
+          <span class="shot-missing">主窗口截图</span>
+        </div>
+        <figcaption>主窗口：首页、生词本、复习和设置。浅色、深色跟随系统。</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" id="why" aria-labelledby="why-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">为什么选悬译</p>
+        <h2 id="why-title">查得快，看得懂，记得住</h2>
+      </div>
+      <div class="why">
+        <ul class="reasons">
+          <li class="reason">
+            <span class="glyph" aria-hidden="true">快</span>
+            <h3>本机先出结果</h3>
+            <p>本机词典毫秒级出结果。文字识别也在本机完成，并常驻预热，按下快捷键就开始。</p>
+          </li>
+          <li class="reason">
+            <span class="glyph" aria-hidden="true">准</span>
+            <h3>结合上下文解释</h3>
+            <p>AI 结合所在的句子解释词义，不只给词典义项。框选的文字会先整理成通顺的段落，再翻译。</p>
+          </li>
+          <li class="reason">
+            <span class="glyph" aria-hidden="true">省</span>
+            <h3>免费版就能用</h3>
+            <p>Apple 系统翻译免费，在本机完成。付费方案的悬译 AI 开箱即用，不用自己申请 API 密钥；额度用完自动改用 Apple 翻译，继续可用。</p>
+          </li>
+          <li class="reason">
+            <span class="glyph long" aria-hidden="true">记得住</span>
+            <h3>生词本与复习</h3>
+            <p>一键加入生词本，连同原句一起保存。按遗忘曲线安排复习，可以导出 Anki 或 CSV。</p>
+          </li>
+          <li class="reason">
+            <span class="glyph long" aria-hidden="true">隐私</span>
+            <h3>截图不离开本机</h3>
+            <p>截图只在本机识别，不保存，不上传。用悬译 AI 时只发送识别出的文字和附近上下文，服务器不保存。没有账号，没有统计分析，没有广告。详见<a href="privacy.html">隐私政策</a>。</p>
+          </li>
+        </ul>
+        <figure class="shot">
+          <div class="shot-frame card-ratio">
+            <img class="only-light" src="assets/card-light.png" alt="悬译的取词卡片：单词 resilient、音标、语境释义和原句翻译" width="760" height="860" loading="lazy" decoding="async">
+            <img class="only-dark" src="assets/card-dark.png" alt="悬译的取词卡片（深色外观）：单词 resilient、音标、语境释义和原句翻译" width="760" height="860" loading="lazy" decoding="async">
+            <span class="shot-missing">取词卡片截图</span>
+          </div>
+          <figcaption>App 里的取词卡片：音标、语境释义和原句在同一张卡片上，一键加入生词本。</figcaption>
+        </figure>
+      </div>
+
+      <div class="pair">
+        <figure class="shot">
+          <div class="shot-frame">
+            <img src="assets/app-vocabulary-light.png" alt="悬译的生词本，列出几个已收藏的单词和释义" width="2000" height="1400" loading="lazy" decoding="async">
+            <span class="shot-missing">生词本截图</span>
+          </div>
+          <figcaption>生词本：搜索、筛选，导出 Anki、CSV。</figcaption>
+        </figure>
+        <figure class="shot">
+          <div class="shot-frame">
+            <img src="assets/app-review-light.png" alt="悬译的复习卡片" width="2000" height="1400" loading="lazy" decoding="async">
+            <span class="shot-missing">复习截图</span>
+          </div>
+          <figcaption>复习：到期的词按遗忘曲线排好，一张一张过。</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section band-sunken" id="ai" aria-labelledby="ai-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">AI 服务</p>
+        <h2 id="ai-title">开箱即用，也能接你自己的模型</h2>
+        <p>新安装默认使用内置的悬译 AI。想用别的服务，付费方案可以填自己的 API 密钥。</p>
+      </div>
+      <div class="engines">
+        <div class="engine is-builtin">
+          <p class="tag">内置 · 默认</p>
+          <h3>悬译 AI</h3>
+          <p>由 DeepSeek 提供，不用申请密钥。文字经我们的服务器转发给 DeepSeek，服务器不保存、不记录翻译文字。</p>
+        </div>
+        <div class="engine">
+          <p class="tag">macOS 自带</p>
+          <h3>Apple 翻译</h3>
+          <p>免费，在本机完成，所有方案不限次数。悬译 AI 额度用完时会自动改用它。</p>
+        </div>
+      </div>
+      <div class="providers">
+        <h3>付费方案可接入的服务</h3>
+        <p>每个服务的密钥单独保存在本机钥匙串，不同步。文字用你自己的密钥直接发给你选的服务商，不经过我们的服务器。</p>
+        <div class="groups">
+          <div class="group">
+            <p class="group-name">国内服务</p>
+            <ul class="pills">
+              <li class="pill">DeepSeek</li>
+              <li class="pill">通义千问（阿里云百炼）</li>
+              <li class="pill">豆包（火山方舟）</li>
+              <li class="pill">Kimi（月之暗面）</li>
+              <li class="pill">智谱 GLM</li>
+              <li class="pill">硅基流动</li>
+            </ul>
+          </div>
+          <div class="group">
+            <p class="group-name">海外服务</p>
+            <ul class="pills">
+              <li class="pill">Claude</li>
+              <li class="pill">OpenAI</li>
+              <li class="pill">Google Gemini</li>
+              <li class="pill">OpenRouter</li>
+            </ul>
+          </div>
+          <div class="group">
+            <p class="group-name">本机与自定义</p>
+            <ul class="pills">
+              <li class="pill">Ollama（本机模型）</li>
+              <li class="pill">其他 OpenAI 兼容接口</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="plans" aria-labelledby="plans-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">方案与价格</p>
+        <h2 id="plans-title">先免费用，需要更多 AI 再升级</h2>
+        <p>所有方案都包含 Apple 翻译、系统词典、生词本、复习和 Anki 导出。</p>
+      </div>
+      <div class="plans">
+        <article class="plan">
+          <div class="plan-head"><h3>免费版</h3></div>
+          <p class="price"><strong>免费</strong><span>无需授权码</span></p>
+          <p class="plan-sum">新用户先免费体验 7 天，之后每日少量悬译 AI。</p>
+          <ul class="ticks">
+            <li>Apple 翻译与系统词典不限</li>
+            <li>新用户 7 天体验，之后每日少量悬译 AI</li>
+            <li>生词本、复习、Anki 导出</li>
+          </ul>
+        </article>
+        <article class="plan is-featured">
+          <div class="plan-head"><h3>标准版</h3><span class="badge">推荐</span></div>
+          <p class="price"><strong>¥128<small>/年</small></strong><span>或 ¥15/月</span></p>
+          <p class="plan-sum">适合每天阅读，并可接入自己的 API。</p>
+          <ul class="ticks">
+            <li>悬译 AI 额度约为免费版的 20 倍，每月重置</li>
+            <li>自定义 API：DeepSeek、通义、Kimi、Claude、Ollama 等</li>
+            <li>每个授权码可在 2 台 Mac 上使用</li>
+          </ul>
+        </article>
+        <article class="plan">
+          <div class="plan-head"><h3>高级版</h3></div>
+          <p class="price"><strong>¥258<small>/年</small></strong><span>或 ¥30/月</span></p>
+          <p class="plan-sum">额度约为标准版的 2.5 倍，适合大量阅读。</p>
+          <ul class="ticks">
+            <li>悬译 AI 额度约为标准版的 2.5 倍，每月重置</li>
+            <li>自定义 API</li>
+            <li>每个授权码可在 2 台 Mac 上使用</li>
+          </ul>
+        </article>
+        <article class="plan">
+          <div class="plan-head"><h3>买断版</h3></div>
+          <p class="price"><strong>¥68</strong><span>一次买断</span></p>
+          <p class="plan-sum">授权不过期，用自己的 API，悬译 AI 同免费版。</p>
+          <ul class="ticks">
+            <li>自定义 API，授权不设到期日</li>
+            <li>悬译 AI 同免费版</li>
+            <li>每个授权码可在 2 台 Mac 上使用</li>
+          </ul>
+        </article>
+      </div>
+      <ul class="plan-notes">
+        <li><span>用量只显示一个小圆环 <span class="ring" aria-hidden="true"></span>，不显示次数</span></li>
+        <li>额度用完自动改用 Apple 翻译</li>
+        <li>月付、年付到期后自动回到免费版</li>
+        <li>长文字消耗更多额度</li>
+      </ul>
+
+      <div class="buy" id="buy">
+        <div>
+          <h3>购买与激活</h3>
+          <ol class="steps">
+            <li><div><p><strong>获取授权码</strong></p><p>在小红书搜索「悬译」，私信获取授权码。</p></div></li>
+            <li><div><p><strong>打开「设置 → 套餐与授权」</strong></p><p>把授权码粘贴进去即可，前后的中文说明会被自动忽略。</p></div></li>
+            <li><div><p><strong>点「激活」</strong></p><p>几秒完成。换电脑时先在旧电脑移除授权，释放设备名额。</p></div></li>
+          </ol>
+        </div>
+        <figure class="shot">
+          <div class="shot-frame plans-ratio">
+            <img src="assets/app-plans-light.png" alt="悬译 App 内的「选择方案」页面" width="1520" height="830" loading="lazy" decoding="async">
+            <span class="shot-missing">方案页截图</span>
+          </div>
+          <figcaption>App 内的「选择方案」页。</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq" aria-labelledby="faq-title">
+    <div class="wrap faq-grid">
+      <div class="section-head">
+        <p class="eyebrow">常见问题</p>
+        <h2 id="faq-title">用之前想知道的事</h2>
+      </div>
+      <div class="faq">
+        <details open>
+          <summary>需要联网吗？</summary>
+          <div class="answer"><p>词典、文字识别和 Apple 翻译在本机完成；只有使用 AI 大模型时需要联网。Apple 翻译初次用某种语言时，系统可能会先下载语言包。</p><p>词典释义适用于英译中，使用 macOS 自带的牛津英汉词典（如未下载，可在「词典」App 设置中勾选）。</p></div>
+        </details>
+        <details>
+          <summary>一定要申请 API 密钥吗？</summary>
+          <div class="answer"><p>不需要。内置的悬译 AI（DeepSeek）开箱即用；付费方案还可以填自己的密钥。</p></div>
+        </details>
+        <details>
+          <summary>怎么激活？</summary>
+          <div class="answer"><p>拿到授权码后，打开「设置 → 套餐与授权」，粘贴授权码，点「激活」，几秒完成。</p></div>
+        </details>
+        <details>
+          <summary>换电脑怎么办？</summary>
+          <div class="answer"><p>先在旧电脑的「设置 → 套餐与授权」移除授权，释放设备名额，再在新电脑激活。遇到问题请联系 <span class="ph">[邮箱 / 微信]</span>。</p></div>
+        </details>
+        <details>
+          <summary>怎么知道还剩多少额度？</summary>
+          <div class="answer"><p>App 里用一个小圆环显示本期用量，不显示次数。指针放上去可以看到百分比和重置时间。额度用完会自动改用 Apple 翻译，卡片上会出现「查看方案」。</p></div>
+        </details>
+        <details>
+          <summary>需要哪些权限？</summary>
+          <div class="answer"><p>「辅助功能」用于响应快捷键、读取选中的文字；「屏幕录制」用于截取指针附近的文字。在 App 里点「打开系统设置…」即可跳转。从菜单栏打开「输入翻译…」不需要这两项权限；全局快捷键（包括 <kbd class="key">⌥</kbd><kbd class="key">I</kbd>）需要「辅助功能」。</p></div>
+        </details>
+        <details>
+          <summary>我的文字会被保存吗？</summary>
+          <div class="answer"><p>截图只在本机内存中识别，不保存到磁盘，也不上传。使用悬译 AI 时，识别出的文字和附近的上下文会经我们的服务器转发给 DeepSeek，服务器不保存、不记录翻译文字。详见<a href="privacy.html">隐私政策</a>。</p></div>
+        </details>
+        <details>
+          <summary>可以退款吗？</summary>
+          <div class="answer"><p><span class="ph">[退款规则]</span></p></div>
+        </details>
+        <details>
+          <summary>有 Windows 版吗？</summary>
+          <div class="answer"><p><span class="ph">[Windows 版状态]</span></p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="section download" id="download" aria-labelledby="download-title">
+    <div class="wrap dl-grid">
+      <div class="section-head">
+        <p class="eyebrow">下载</p>
+        <h2 id="download-title">在你的 Mac 上试试</h2>
+        <p>装好就是免费版，不用注册账号。需要更多悬译 AI 时，再输入授权码升级。</p>
+        <div class="cta-row">
+          <span class="btn btn-primary" role="link" aria-disabled="true" data-download-link>下载 Mac 版<small>（即将开放）</small></span>
+          <a class="btn btn-quiet" href="#plans">查看方案</a>
+        </div>
+      </div>
+      <div id="requirements">
+        <h3 class="req-title">系统要求</h3>
+        <dl class="req">
+          <div><dt>芯片</dt><dd>Apple Silicon（M 系列芯片）的 Mac</dd></div>
+          <div><dt>系统</dt><dd>macOS 26 或以上</dd></div>
+          <div><dt>权限</dt><dd>辅助功能、屏幕录制（App 内一键跳转授权）</dd></div>
+          <div><dt>网络</dt><dd>只有使用 AI 大模型时需要</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div>
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">悬<img src="assets/icon.png" alt="" width="30" height="30" loading="lazy"></span>
+        悬译 <span class="en">HoverLing</span>
+      </a>
+      <p class="foot-tag">指哪译哪的 Mac 阅读助手</p>
+    </div>
+    <ul class="foot-facts">
+      <li>悬译 AI 使用深度求索 DeepSeek 大模型（模型备案号：<span class="ph">[DeepSeek 备案号]</span>）</li>
+      <li>本服务登记号：<span class="ph">[登记号]</span></li>
+      <li>联系我们：<span class="ph">[邮箱 / 微信]</span></li>
+    </ul>
+    <nav class="foot-links" aria-label="法律信息">
+      <a href="privacy.html">隐私政策</a>
+      <a href="eula.html">许可协议</a>
+    </nav>
+    <div class="foot-legal">
+      <p>© 2026 悬译 HoverLing</p>
+      <p>Apple、Mac、macOS 是 Apple Inc. 的商标。其他服务名称归各自所有者所有。</p>
+      <!-- 在中国大陆托管时，在这里加上 ICP 备案号：<p><a href="https://beian.miit.gov.cn/" rel="noopener">[ICP备案号]</a></p> -->
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // Screenshots and icons: if a file is missing, keep the frame and show its label.
+  function markMissing(img) {
+    img.hidden = true;
+    var frame = img.closest(".shot-frame, .brand-mark");
+    if (frame) frame.classList.add("is-missing");
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".shot-frame img, .brand-mark img"), function (img) {
+    img.addEventListener("error", function () { markMissing(img); });
+    if (img.complete && img.naturalWidth === 0 && img.getAttribute("src")) markMissing(img);
+  });
+
+  // The lookup demo.
+  var text = document.getElementById("demo-text");
+  var slot = document.getElementById("card-slot");
+  var key = document.getElementById("demo-key");
+  if (!text || !slot) return;
+  var words = Array.prototype.slice.call(text.querySelectorAll(".hw"));
+  var active = text.querySelector(".hw.is-active") || words[0];
+  var canHover = window.matchMedia ? window.matchMedia("(hover: hover) and (pointer: fine)") : { matches: false };
+
+  function place() {
+    var box = text.getBoundingClientRect();
+    var word = active.getBoundingClientRect();
+    var avail = text.clientWidth;
+    var width = slot.offsetWidth;
+    var center = word.left + word.width / 2 - box.left;
+    var x = 0;
+    if (width < avail - 1) x = Math.round(Math.min(Math.max(center - 64, 0), avail - width));
+    var caret = Math.round(Math.min(Math.max(center - x, 24), width - 24));
+    slot.style.setProperty("--x", x + "px");
+    slot.style.setProperty("--caret", caret + "px");
+  }
+
+  function press() {
+    if (!key) return;
+    key.classList.remove("is-pressed");
+    void key.offsetWidth;
+    key.classList.add("is-pressed");
+  }
+
+  // Screen readers hear which word's card is showing.
+  function syncPressed() {
+    words.forEach(function (word) { word.setAttribute("aria-pressed", word === active ? "true" : "false"); });
+  }
+
+  function show(word) {
+    if (word !== active) {
+      active.classList.remove("is-active");
+      var old = document.getElementById(active.getAttribute("data-card"));
+      if (old) old.classList.remove("is-active");
+      active = word;
+      active.classList.add("is-active");
+      var card = document.getElementById(active.getAttribute("data-card"));
+      if (card) card.classList.add("is-active");
+      syncPressed();
+      press();
+    }
+    place();
+  }
+
+  words.forEach(function (word) {
+    word.addEventListener("mouseenter", function () { if (canHover.matches) show(word); });
+    word.addEventListener("focus", function () { show(word); });
+    word.addEventListener("click", function () { show(word); });
+  });
+
+  syncPressed();
+  place();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+  window.addEventListener("resize", place);
+  window.requestAnimationFrame(function () {
+    window.requestAnimationFrame(function () { slot.classList.add("is-ready"); });
+  });
+})();
+</script>
+</body>
+</html>
