@@ -5,195 +5,217 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>悬译隐私政策</title>
 <meta name="description" content="悬译 HoverLing 隐私政策：哪些内容在你的 Mac 上处理，哪些会离开你的 Mac。">
-<meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f6f6fa" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#16171c" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f9f8f5">
 <link rel="icon" type="image/png" href="assets/icon.png">
 <style>
 :root {
-  --paper: #f6f6fa;
-  --sunken: #eeeff8;
-  --surface: #ffffff;
-  --ink: #17181f;
-  --muted: #666977;
-  --faint: #a4a7b4;
-  --border: #e4e5ec;
+  color-scheme: light;
+  --paper: #f9f8f5;
+  --paper-2: #f2f0ea;
+  --ink: #16120e;
+  --ink-2: #3b362f;
+  --muted: #6b655c;
+  --faint: #a9a297;
+  --line: #e4e0d7;
   --accent: #4b51e0;
   --accent-soft: #edeefe;
-  --prominent: #4b51e0;
-  --on-prominent: #ffffff;
-  --marker: rgba(255, 226, 122, 0.78);
-  --header-bg: rgba(246, 246, 250, 0.86);
-  --font-display: ui-serif, "New York", "Songti SC", "Noto Serif SC", serif;
-  --font-body: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-display: "Songti SC", "STSong", ui-serif, "Iowan Old Style", Georgia, "Noto Serif SC", serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #16171c;
-    --sunken: #1b1c26;
-    --surface: #1f2027;
-    --ink: #eceef5;
-    --muted: #9a9dab;
-    --faint: #6c6f7c;
-    --border: #30323c;
-    --accent: #9097ff;
-    --accent-soft: #272a48;
-    --prominent: #5e64ec;
-    --on-prominent: #ffffff;
-    --marker: rgba(94, 100, 236, 0.45);
-    --header-bg: rgba(22, 23, 28, 0.86);
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #16171c;
-  --sunken: #1b1c26;
-  --surface: #1f2027;
-  --ink: #eceef5;
-  --muted: #9a9dab;
-  --faint: #6c6f7c;
-  --border: #30323c;
-  --accent: #9097ff;
-  --accent-soft: #272a48;
-  --prominent: #5e64ec;
-  --on-prominent: #ffffff;
-  --marker: rgba(94, 100, 236, 0.45);
-  --header-bg: rgba(22, 23, 28, 0.86);
-  color-scheme: dark;
 }
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: #f9f8f5; }
 body {
   margin: 0;
-  background: var(--paper);
-  color: var(--ink);
+  background: #f9f8f5;
+  color: #16120e;
   font-family: var(--font-body);
-  font-size: 0.9375rem;
-  line-height: 1.8;
+  font-size: 16px;
+  line-height: 1.85;
   -webkit-font-smoothing: antialiased;
 }
-body::before {
-  content: ""; position: fixed; inset: 0 0 auto; z-index: 30;
-  height: env(safe-area-inset-top, 0px); background: var(--header-bg);
-}
-a { color: var(--accent); text-underline-offset: 3px; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-.wrap {
-  width: 100%; max-width: 820px; margin-inline: auto;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-}
-@media (min-width: 700px) {
-  .wrap {
-    padding-left: max(32px, env(safe-area-inset-left, 0px));
-    padding-right: max(32px, env(safe-area-inset-right, 0px));
-  }
-}
+a { color: #4b51e0; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid #4b51e0; outline-offset: 3px; border-radius: 6px; }
+.wrap { width: min(100% - 32px, 760px); margin-inline: auto; }
+@media (min-width: 720px) { .wrap { width: min(100% - 48px, 760px); } }
 .top {
-  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
-  background: var(--header-bg);
-  -webkit-backdrop-filter: saturate(1.4) blur(14px);
-  backdrop-filter: saturate(1.4) blur(14px);
-  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px max(16px, env(safe-area-inset-left, 0px)) 0 max(16px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
 }
-.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; }
-.brand {
-  display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;
-  font-family: var(--font-display); font-weight: 700; font-size: 1.0625rem; white-space: nowrap;
+.pills {
+  pointer-events: auto; display: flex; gap: 3px; padding: 4px; border-radius: 999px;
+  background: rgba(233, 230, 222, 0.72); box-shadow: inset 0 0 0 1px rgba(22, 18, 14, 0.05), 0 8px 24px rgba(22, 18, 14, 0.06);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
 }
-.brand-mark {
-  position: relative; width: 30px; height: 30px; border-radius: 8px; flex: none;
-  display: grid; place-items: center; font: 700 15px/1 var(--font-display); color: transparent;
+.pill {
+  display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 14px; border-radius: 999px;
+  background: #ffffff; color: #16120e; font-size: 14px; font-weight: 500; line-height: 1; text-decoration: none; white-space: nowrap;
 }
-.brand-mark.is-missing { background: var(--prominent); color: var(--on-prominent); }
-.brand-mark img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.back { font-size: 0.8125rem; font-weight: 500; color: var(--muted); text-decoration: none; }
-.back:hover { color: var(--ink); }
-main { padding-block: clamp(36px, 6vw, 72px) clamp(48px, 8vw, 96px); }
-.doc { max-width: 40em; }
+.pill:hover { background: #f3f1ec; }
+.pill.brand { padding: 0 14px 0 11px; font-family: var(--font-display); font-size: 17px; font-weight: 400; letter-spacing: 0.02em; }
+.mark { width: 20px; height: 21px; flex: none; color: #16120e; }
+.mark .m-text { fill: currentColor; opacity: 0.24; }
+.mark .m-card { fill: currentColor; }
+.mark .m-hi { fill: #ffd84d; }
+.mark .m-line { fill: #9ea6fa; }
+.mark .m-ptr { fill: #ffffff; stroke: currentColor; stroke-width: 5; stroke-linejoin: round; }
+main { padding-block: clamp(56px, 9vw, 112px) clamp(64px, 10vw, 128px); }
 .doc h1 {
-  font-family: var(--font-display); font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
-  line-height: 1.25; margin: 0 0 18px; text-wrap: balance;
+  font-family: var(--font-display); font-weight: 300; font-synthesis: none; font-size: clamp(30px, 3.8vw, 44px);
+  line-height: 1.22; letter-spacing: -0.01em; margin: 0 0 22px; text-wrap: balance; word-break: keep-all;
 }
 .doc h2 {
-  font-family: var(--font-display); font-size: 1.25rem; line-height: 1.4;
-  margin: 36px 0 10px; text-wrap: balance;
+  font-family: var(--font-display); font-weight: 400; font-size: clamp(22px, 2.2vw, 27px);
+  line-height: 1.35; margin: 44px 0 12px; padding-top: 22px; border-top: 1px solid #e4e0d7; text-wrap: balance;
 }
-.doc p, .doc ul { margin: 0 0 12px; }
-.doc ul { padding-left: 1.3em; }
-.doc li { margin-bottom: 6px; }
-.doc li::marker { color: var(--faint); }
+.doc p, .doc ul { margin: 0 0 14px; }
+.doc ul { padding-left: 1.2em; }
+.doc li { margin-bottom: 8px; }
+.doc li::marker { color: #a9a297; }
 .doc strong { font-weight: 600; }
 .doc code {
-  font-family: var(--font-mono); font-size: 0.85em; padding: 0.1em 0.35em;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 5px;
-  overflow-wrap: anywhere;
+  font-family: var(--font-mono); font-size: 0.84em; padding: 0.1em 0.4em;
+  background: #ffffff; border: 1px solid #e4e0d7; border-radius: 6px; overflow-wrap: anywhere;
 }
 .doc .note {
-  margin: 0 0 22px; padding: 12px 16px; border-radius: 12px;
-  background: var(--sunken); border: 1px solid var(--border); color: var(--muted); font-size: 0.875rem;
+  margin: 0 0 26px; padding: 14px 18px; border-radius: 16px;
+  background: #f2f0ea; color: #3b362f; font-size: 14.5px;
 }
 .doc .note p { margin: 0; }
-.doc .meta { color: var(--muted); font-size: 0.875rem; }
+.doc .meta { color: #6b655c; font-size: 14px; }
 .doc .meta .item { white-space: nowrap; }
-.ph {
-  color: var(--accent); background: var(--accent-soft); border-radius: 4px;
-  padding: 0 0.25em; font-size: 0.92em;
+.ph { color: #4b51e0; background: #edeefe; border-radius: 4px; padding: 0 0.25em; font-size: 0.94em; }
+.foot { padding-block: 36px 48px; border-top: 1px solid #e4e0d7; color: #6b655c; font-size: 13px; line-height: 1.75; }
+.foot .wrap { display: grid; gap: 4px; }
+.foot-tag { font-family: var(--font-display); font-weight: 300; font-size: 24px; line-height: 1.3; color: #16120e; margin: 0 0 14px; }
+.foot-tag em { font-style: normal; font-synthesis: none; }
+.foot-tag mark { color: inherit; background: linear-gradient(transparent 58%, rgba(255, 226, 122, 0.75) 58% 92%, transparent 92%); padding: 0 0.04em; }
+.doc .tbl { margin: 4px 0 22px; border: 1px solid #e4e0d7; border-radius: 14px; background: #ffffff; overflow: hidden; }
+.doc table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.65; }
+.doc th, .doc td { padding: 10px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid #ece9e2; }
+.doc th { font-weight: 500; font-size: 13px; color: #6b655c; background: #f2f0ea; white-space: nowrap; }
+.doc tr:last-child td { border-bottom: 0; }
+.doc td:first-child { min-width: 6.5em; }
+.doc td code { overflow-wrap: anywhere; }
+/* Phones: each row becomes a small labelled block instead of a squeezed three-column grid. */
+@media (max-width: 600px) {
+  .doc table, .doc tbody, .doc tr, .doc td { display: block; }
+  .doc thead { display: none; }
+  .doc tr { padding: 12px 14px; border-bottom: 1px solid #ece9e2; }
+  .doc tr:last-child { border-bottom: 0; }
+  .doc td { display: grid; grid-template-columns: 4.6em minmax(0, 1fr); gap: 10px; padding: 3px 0; border: 0; }
+  .doc td::before { content: attr(data-label); color: #6b655c; font-size: 12.5px; padding-top: 1px; }
+  .doc td:first-child { display: block; padding-bottom: 4px; font-weight: 600; }
+  .doc td:first-child::before { content: none; }
 }
-.foot { padding-block: 32px 44px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.8125rem; }
-.foot .wrap { display: grid; gap: 6px; }
-.foot-links { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 6px; }
-.foot-links a { color: var(--ink); text-decoration: none; font-weight: 500; }
-.foot-links a:hover, .foot-links a[aria-current="page"] { color: var(--accent); }
+.foot-links { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 12px; font-size: 14px; }
+.foot-links a { color: #16120e; text-decoration: none; }
+.foot-links a:hover { text-decoration: underline; }
+.foot-links a[aria-current="page"] { color: #6b655c; }
+.foot .mono { font-family: var(--font-mono); font-size: 12px; color: #3b362f; }
+.foot p { margin: 0; }
 </style>
 </head>
 <body>
 <header class="top">
-  <div class="wrap">
-    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">悬<img src="assets/icon.png" alt="" width="30" height="30" onerror="this.hidden=true;this.parentNode.classList.add('is-missing')"></span>悬译 HoverLing</a>
-    <a class="back" href="index.html">返回首页</a>
-  </div>
+  <nav class="pills" aria-label="站点">
+    <a class="pill brand" href="index.html"><svg class="mark" viewBox="0 0 100 104" aria-hidden="true"><rect class="m-text" x="10" y="73.5" width="62" height="6.5" rx="3.2"/><path class="m-card" d="M21 8H79a11 11 0 0 1 11 11v24a11 11 0 0 1-11 11H51l-7 10.5L37 54H21a11 11 0 0 1-11-11V19a11 11 0 0 1 11-11z"/><rect class="m-hi" x="21" y="18" width="42" height="9.5" rx="3.5"/><rect class="m-line" x="21" y="34.5" width="30" height="7" rx="3.5"/><path class="m-ptr" d="M44 66.5V95.7l7.1-6.8 4.9 10.6 4.8-2.2-4.9-10.4h9.2z"/></svg><span>悬译</span></a>
+    <a class="pill" href="index.html">返回首页</a>
+  </nav>
 </header>
 <main>
   <article class="wrap"><div class="doc">
     <h1>悬译 HoverLing 隐私政策（草稿）</h1>
-    <div class="note"><p>草稿，发布前请自行审阅；方括号内容需要你填写。本文不构成法律意见。</p></div>
+    <div class="note"><p>草稿，发布前请自行审阅或请专业人士审阅；方括号内容需要你填写。本文不构成法律意见。待律师确认：《个人信息保护法》第三十九条中的「境外接收方」应写运营者本人，还是香港服务器的托管服务商（本稿两者都列出）。</p></div>
     <p class="meta"><span class="item">最近更新：<span class="ph">[日期]</span></span>　　<span class="item">运营者：<span class="ph">[卖家名称]</span></span>　　<span class="item">联系方式：<span class="ph">[邮箱 / 微信]</span></span></p>
-    <p>悬译没有账号、没有统计分析、没有广告。</p>
+    <p>悬译没有统计分析，没有广告。<strong>只有使用内置「悬译 AI」时需要登录账号</strong>；Apple 翻译、系统词典、生词本，以及用你自己的 API 密钥（包括离线授权码解锁的「自定义 API」）都不需要账号。登录前，App 会请你阅读本政策和《用户协议》，并<strong>主动勾选同意</strong>（默认不勾选）；不同意可以继续使用不需要账号的功能。</p>
     <h2>在你的 Mac 上处理的内容</h2>
     <ul>
       <li><strong>截图</strong>：只截取指针附近或你框选的区域，在本机内存中识别文字，不保存到磁盘，也不上传。</li>
       <li><strong>Apple 翻译与词典</strong>：由 macOS 处理，适用 Apple 的隐私政策。</li>
-      <li><strong>本地数据</strong>：生词本、最近取词、设置、授权码和诊断记录（只有阶段、耗时和错误码，不含文字或截图）保存在 <code>~/Library/Application Support/HoverLing/</code>；你自己的 API 密钥保存在 macOS 钥匙串，不同步到 iCloud。删除该文件夹和钥匙串中的「local.hoverling」条目即可清除。</li>
+      <li><strong>本地数据</strong>：生词本、最近取词、设置、授权码和诊断记录（只有阶段、耗时和错误码，不含文字或截图）保存在 <code>~/Library/Application Support/HoverLing/</code>；你自己的 API 密钥和悬译账号的登录凭证保存在 macOS 钥匙串，不同步到 iCloud。删除该文件夹和钥匙串中的「local.hoverling」条目即可清除。</li>
     </ul>
+    <h2>悬译账号</h2>
+    <p>登录悬译 AI 时，我们收集和保存：</p>
+    <div class="tbl"><table>
+      <thead><tr><th scope="col">信息</th><th scope="col">用途</th><th scope="col">怎么保存</th><th scope="col">保存多久</th></tr></thead>
+      <tbody>
+        <tr><td data-label="信息"><strong>邮箱地址</strong></td><td data-label="用途">发送登录 / 注销验证码，识别你的账号，客服查询</td><td data-label="怎么保存">加密保存（AES-256-GCM），另存一个带密钥的哈希用于查找；管理界面默认只显示打码形式（如 <code>li***@qq.com</code>），查看完整邮箱会留下审计记录</td><td data-label="保存多久">到你注销为止</td></tr>
+        <tr><td data-label="信息">登录验证码</td><td data-label="用途">确认邮箱属于你</td><td data-label="怎么保存">只保存哈希，10 分钟后失效，用后即删</td><td data-label="保存多久">10 分钟</td></tr>
+        <tr><td data-label="信息">本机机器码</td><td data-label="用途">每个账号最多 2 台设备；每台 Mac 只能领一次新用户体验</td><td data-label="怎么保存">只保存哈希（机器码本身是硬件标识经单向哈希后的短编码，无法还原硬件信息）</td><td data-label="保存多久">到注销或移除设备为止</td></tr>
+        <tr><td data-label="信息">设备名称（如「MacBook Pro」，你可以改）</td><td data-label="用途">在「设备」列表里让你认出每台 Mac</td><td data-label="怎么保存">加密保存</td><td data-label="保存多久">到注销或移除设备为止</td></tr>
+        <tr><td data-label="信息">登录凭证</td><td data-label="用途">保持登录</td><td data-label="怎么保存">只保存哈希；180 天未使用自动失效，可随时退出或移除设备</td><td data-label="保存多久">失效后 30 天</td></tr>
+        <tr><td data-label="信息">方案与兑换记录</td><td data-label="用途">你购买或兑换的方案、到期日、兑换码使用状态</td><td data-label="怎么保存">兑换码本身只保存哈希</td><td data-label="保存多久">到注销为止（兑换码保持「已使用」）</td></tr>
+        <tr><td data-label="信息">购买备注（订单号等）</td><td data-label="用途">售后查询（我们在小红书私信里收到的订单信息，只记订单号，不记昵称）</td><td data-label="怎么保存">加密保存</td><td data-label="保存多久">到注销为止</td></tr>
+        <tr><td data-label="信息">旧授权码绑定</td><td data-label="用途">把此前购买的离线授权码转为账号方案</td><td data-label="怎么保存">授权 ID、方案、到期日；发码时的备注加密保存；不保存授权码原文和持有人姓名</td><td data-label="保存多久">长期（防止一个授权码被重复绑定）</td></tr>
+        <tr><td data-label="信息">每次翻译的用量</td><td data-label="用途">计算额度和服务成本</td><td data-label="怎么保存">一条记录：时间、方案、消耗的「次」、token 数量、估算成本、结果；<strong>不含任何文字，也不含 IP</strong></td><td data-label="保存多久">400 天</td></tr>
+        <tr><td data-label="信息">IP 地址</td><td data-label="用途">防止滥用（例如同一网络批量注册、刷验证码）</td><td data-label="怎么保存">不保存原始 IP。只以「日期 + 所在网络段」的带密钥哈希出现在计数器里，每天变化，不能反推出 IP，也不能把不同日期关联起来</td><td data-label="保存多久">14 天</td></tr>
+        <tr><td data-label="信息">操作记录（审计）</td><td data-label="用途">记录我们对账号做过的操作（开通、撤销、停用、查看完整邮箱、绑定被拒等）</td><td data-label="怎么保存">账号 ID、时间、操作；你注销后账号 ID 会被换成随机编号、细节被删除</td><td data-label="保存多久">3 年</td></tr>
+      </tbody>
+    </table></div>
+    <p>我们的服务器日志只记录接口路径、状态、方案、耗时和错误码，<strong>不记录邮箱、验证码、登录凭证、机器码或任何翻译文字</strong>；网关（Caddy）的错误日志会把你的 IP 打码到前两段（如 <code>113.87.0.0</code>），并删除机器码；日志按每个服务 30 MB 滚动覆盖。我们发给自己的运维告警（企业微信 / 钉钉 / 飞书群机器人）不含你的邮箱或账号 ID。</p>
     <h2>使用内置「悬译 AI」时</h2>
     <p>识别出的文字和附近最多约 2400 字的上下文，会经我们的服务器转发给 DeepSeek 完成翻译，结果直接传回你的 Mac。</p>
     <ul>
       <li><strong>我们的服务器不保存、不记录任何翻译文字。</strong></li>
-      <li>为了计算额度和设备数，服务器保存：本机机器码（硬件标识经单向哈希后的短编码，无法还原硬件信息）、授权 ID（如已激活）、每日/每月用量计数、每个授权码使用过的机器码、以及按天计数的 IP 地址加盐哈希（不保存原始 IP）。</li>
-      <li>翻译文字由 DeepSeek 处理，适用 DeepSeek 的隐私政策。</li>
+      <li>翻译文字由 DeepSeek 处理，适用 DeepSeek 的隐私政策。我们的服务器内部可能使用开源计费组件（New API，运行在同一台服务器上）记录每个账号的 token 用量和费用，同样不记录文字，记录定期清理。</li>
+      <li>翻译结果由人工智能（<span class="ph">[模型名称，如 DeepSeek]</span>）自动生成，App 内有相应标识。</li>
       <li>不想经过我们的服务器：改用 Apple 翻译，或在付费方案中接入你自己的 API。</li>
     </ul>
-    <h2>使用你自己的 API 时（付费方案）</h2>
-    <p>文字用<strong>你自己的 API 密钥</strong>直接发送给你选择的服务商（例如 DeepSeek、阿里云百炼、Anthropic、OpenAI），不经过我们的服务器，处理方式由该服务商的隐私政策决定。选择「Ollama（本机模型）」时，请求只发往你自己的电脑或局域网。</p>
+    <h2>信息存放地点与出境说明</h2>
+    <p>我们的服务器位于<strong>中国香港</strong>（<span class="ph">[服务器提供商，例如 腾讯云轻量应用服务器 中国香港地域]</span>）。对中国大陆用户而言，你的账号信息存放在香港属于个人信息出境。根据《个人信息保护法》第三十九条，告知如下：</p>
+    <ul>
+      <li><strong>境外接收方</strong>：<span class="ph">[卖家名称]</span>（即本服务运营者），联系方式 <span class="ph">[邮箱 / 微信]</span>；数据存放在 <span class="ph">[服务器提供商]</span> 位于香港的服务器上；</li>
+      <li><strong>处理目的和方式</strong>：提供账号登录、方案管理和悬译 AI 翻译服务，按上表方式加密或哈希保存；</li>
+      <li><strong>个人信息种类</strong>：邮箱地址、设备名称、机器码哈希、方案与用量记录、购买备注；</li>
+      <li><strong>你的权利</strong>：可随时查阅账号信息、在 App 内注销账号（见下文），或通过 <span class="ph">[邮箱 / 微信]</span> 联系我们行使查阅、更正、删除等权利。</li>
+    </ul>
+    <p>我们出境处理这些信息是为了履行与你之间的服务协议（提供你要求的账号和翻译服务），并在你登录前取得你的单独同意。</p>
+    <h2>受托处理方</h2>
+    <div class="tbl"><table>
+      <thead><tr><th scope="col">受托方</th><th scope="col">处理的信息</th><th scope="col">用途</th><th scope="col">所在地</th></tr></thead>
+      <tbody>
+        <tr><td data-label="受托方"><span class="ph">[阿里云邮件推送 / 腾讯云邮件推送（二选一）]</span></td><td data-label="处理的信息">你的邮箱地址、验证码邮件内容</td><td data-label="用途">发送登录和注销验证码</td><td data-label="所在地"><span class="ph">[所选地域，例如 阿里云杭州（中国大陆）/ 阿里云新加坡 / 腾讯云中国香港]</span></td></tr>
+        <tr><td data-label="受托方">DeepSeek（杭州深度求索人工智能基础技术研究有限公司）</td><td data-label="处理的信息">你选择翻译的文字和上下文</td><td data-label="用途">生成翻译结果</td><td data-label="所在地">中国大陆</td></tr>
+        <tr><td data-label="受托方"><span class="ph">[服务器提供商]</span></td><td data-label="处理的信息">存放在服务器上的加密数据</td><td data-label="用途">服务器托管</td><td data-label="所在地">中国香港</td></tr>
+      </tbody>
+    </table></div>
+    <h2>保存期限</h2>
+    <ul>
+      <li>账号信息保存到你注销账号为止；登录凭证 180 天未使用自动失效；验证码 10 分钟失效；</li>
+      <li>每次翻译的用量记录（不含文字和 IP）保留 400 天；IP 相关的哈希计数保留 14 天；操作记录保留 3 年；</li>
+      <li><strong>注销账号后</strong>，我们删除你的邮箱（密文和哈希）、设备、登录凭证、方案、购买备注和用量计数。以下内容保留，但已无法关联到你：</li>
+      <li>为防止同一邮箱或同一台 Mac 注销后重复领取新用户体验，保留两条<strong>去标识化处理的记录</strong>（邮箱与机器码的带密钥哈希），仅用于这一目的，<strong>保留 2 年</strong>后删除；</li>
+      <li>注销当天已用的免费次数，以邮箱哈希记到当天 24 点（防止注销后立即重新注册领取当天额度）；</li>
+      <li>已使用过的兑换码保持「已使用」状态；已绑定过的旧授权码保持「已绑定」状态（如需重新绑定，请联系我们核实）；</li>
+      <li>用量记录去掉账号标识后保留到期满；操作记录中的账号编号换成随机编号并删除细节，保留到期满。</li>
+      <li><strong>加密备份</strong>：服务器上保留 <span class="ph">[14]</span> 天，运营者自己电脑上的加密副本保留 <span class="ph">[30]</span> 天；你注销后，你的信息最迟在 <span class="ph">[30]</span> 天后从所有备份中消失。</li>
+    </ul>
+    <h2>注销账号</h2>
+    <p>在 App「账号与套餐 → 注销账号」中操作：我们会向你的账号邮箱发送一个注销验证码，输入后账号立即删除，不可恢复（已购方案随之失效）。也可以通过 <span class="ph">[邮箱 / 微信]</span> 联系我们代为注销。</p>
     <h2>授权码与机器码</h2>
-    <p>授权码在本机验证；使用悬译 AI 时，授权码会随请求发送给我们的服务器以确认方案。「本机机器码」只有在使用悬译 AI 或你主动发给我们时才会离开你的 Mac。</p>
-    <h2>联系我们</h2>
-    <p>对本政策有疑问，或需要我们删除与你的授权码、机器码相关的用量记录，请联系 <span class="ph">[邮箱 / 微信]</span>。</p>
+    <p>离线授权码在本机验证，不需要联网。登录后选择「绑定到账号」时，授权码会发送给我们的服务器验证一次，我们只记录授权 ID 和它绑定的账号。「本机机器码」只有在登录或使用悬译 AI 时才会离开你的 Mac。</p>
+    <h2>未成年人</h2>
+    <p>悬译不面向 14 周岁以下的儿童。如果你未满 14 周岁，请在监护人同意和指导下使用。</p>
+    <h2>投诉、举报与联系我们</h2>
+    <p>对本政策有疑问，需要查阅、更正、删除你的个人信息，或要投诉、举报（包括对 AI 生成内容的投诉），请联系 <span class="ph">[邮箱 / 微信]</span>。我们会在 <span class="ph">[15]</span> 个工作日内答复。</p>
   </div></article>
 </main>
 <footer class="foot">
   <div class="wrap">
+    <p class="foot-tag">Mac 上的悬停翻译，<em><mark>指哪译哪</mark>。</em></p>
     <nav class="foot-links" aria-label="法律信息">
       <a href="index.html">首页</a>
       <a href="privacy.html" aria-current="page">隐私政策</a>
       <a href="eula.html">许可协议</a>
     </nav>
-    <p>悬译 AI 使用深度求索 DeepSeek 大模型（模型备案号：<span class="ph">[DeepSeek 备案号]</span>）</p>
+    <p>悬译 AI 由 DeepSeek 提供（深度求索 DeepSeek 大模型，模型备案号：<span class="ph">[DeepSeek 备案号]</span>）</p>
     <p>本服务登记号：<span class="ph">[登记号]</span></p>
-    <p>© 2026 悬译 HoverLing</p>
+    <p class="mono">© 2026 悬译 HoverLing</p>
+    <p>Apple、Mac、macOS 是 Apple Inc. 的商标。其他服务名称归各自所有者所有。</p>
   </div>
 </footer>
 </body>
