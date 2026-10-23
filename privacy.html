@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>悬译隐私政策</title>
-<meta name="description" content="悬译 HoverLing 隐私政策：哪些内容在你的 Mac 上处理，哪些会离开你的 Mac。">
+<title>知译隐私政策</title>
+<meta name="description" content="知译 Zhiyi 隐私政策：哪些内容在你的 Mac 上处理，哪些会离开你的 Mac。">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#f9f8f5">
 <link rel="icon" type="image/png" href="assets/icon.png">
@@ -42,7 +42,7 @@ a { color: #4b51e0; text-underline-offset: 3px; }
 .top {
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 12px max(16px, env(safe-area-inset-left, 0px)) 0 max(16px, env(safe-area-inset-right, 0px));
+  padding: max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
   pointer-events: none;
 }
 .pills {
@@ -106,15 +106,30 @@ main { padding-block: clamp(56px, 9vw, 112px) clamp(64px, 10vw, 128px); }
   .doc thead { display: none; }
   .doc tr { padding: 12px 14px; border-bottom: 1px solid #ece9e2; }
   .doc tr:last-child { border-bottom: 0; }
-  .doc td { display: grid; grid-template-columns: 4.6em minmax(0, 1fr); gap: 10px; padding: 3px 0; border: 0; }
-  .doc td::before { content: attr(data-label); color: #6b655c; font-size: 12.5px; padding-top: 1px; }
-  .doc td:first-child { display: block; padding-bottom: 4px; font-weight: 600; }
+  /* A label in its own column and the value as running text beside it (a grid would put each inline piece
+     of the value, a code span or a bold phrase, in a cell of its own). */
+  .doc td { display: block; position: relative; padding: 3px 0 3px 5.6em; border: 0; }
+  .doc td::before { content: attr(data-label); position: absolute; left: 0; top: 4px; white-space: nowrap; color: #6b655c; font-size: 12.5px; }
+  .doc td:first-child { display: block; padding-left: 0; padding-bottom: 4px; font-weight: 600; }
   .doc td:first-child::before { content: none; }
 }
 .foot-links { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 12px; font-size: 14px; }
 .foot-links a { color: #16120e; text-decoration: none; }
 .foot-links a:hover { text-decoration: underline; }
 .foot-links a[aria-current="page"] { color: #6b655c; }
+/* iPhone and iPad have no Songti: PingFang SC by name, Light for the title, Regular for the smaller lines
+   (the landing page does the same). */
+@supports (-webkit-touch-callout: none) {
+  :root { --font-display: "PingFang SC", "Hiragino Sans GB", -apple-system, sans-serif; }
+  .foot-tag { font-weight: 400; }
+}
+/* Touch: 44 px to a thumb (the pill's ::after reaches through the group's padding). */
+@media (pointer: coarse) {
+  .pill { height: 40px; position: relative; }
+  .pill::after { content: ""; position: absolute; inset: -4px 0; }
+  .foot-links a { display: inline-block; padding-block: 10px; }
+  .foot-links { margin-block: -10px 2px; }
+}
 .foot .mono { font-family: var(--font-mono); font-size: 12px; color: #3b362f; }
 .foot p { margin: 0; }
 </style>
@@ -122,31 +137,31 @@ main { padding-block: clamp(56px, 9vw, 112px) clamp(64px, 10vw, 128px); }
 <body>
 <header class="top">
   <nav class="pills" aria-label="站点">
-    <a class="pill brand" href="index.html"><svg class="mark" viewBox="0 0 100 104" aria-hidden="true"><rect class="m-text" x="10" y="73.5" width="62" height="6.5" rx="3.2"/><path class="m-card" d="M21 8H79a11 11 0 0 1 11 11v24a11 11 0 0 1-11 11H51l-7 10.5L37 54H21a11 11 0 0 1-11-11V19a11 11 0 0 1 11-11z"/><rect class="m-hi" x="21" y="18" width="42" height="9.5" rx="3.5"/><rect class="m-line" x="21" y="34.5" width="30" height="7" rx="3.5"/><path class="m-ptr" d="M44 66.5V95.7l7.1-6.8 4.9 10.6 4.8-2.2-4.9-10.4h9.2z"/></svg><span>悬译</span></a>
+    <a class="pill brand" href="index.html"><svg class="mark" viewBox="0 0 100 104" aria-hidden="true"><rect class="m-text" x="10" y="73.5" width="62" height="6.5" rx="3.2"/><path class="m-card" d="M21 8H79a11 11 0 0 1 11 11v24a11 11 0 0 1-11 11H51l-7 10.5L37 54H21a11 11 0 0 1-11-11V19a11 11 0 0 1 11-11z"/><rect class="m-hi" x="21" y="18" width="42" height="9.5" rx="3.5"/><rect class="m-line" x="21" y="34.5" width="30" height="7" rx="3.5"/><path class="m-ptr" d="M44 66.5V95.7l7.1-6.8 4.9 10.6 4.8-2.2-4.9-10.4h9.2z"/></svg><span>知译</span></a>
     <a class="pill" href="index.html">返回首页</a>
   </nav>
 </header>
 <main>
   <article class="wrap"><div class="doc">
-    <h1>悬译 HoverLing 隐私政策（草稿）</h1>
+    <h1>知译 Zhiyi 隐私政策（草稿）</h1>
     <div class="note"><p>草稿，发布前请自行审阅或请专业人士审阅；方括号内容需要你填写。本文不构成法律意见。待律师确认：《个人信息保护法》第三十九条中的「境外接收方」应写运营者本人，还是香港服务器的托管服务商（本稿两者都列出）。</p></div>
-    <p class="meta"><span class="item">最近更新：<span class="ph">[日期]</span></span>　　<span class="item">运营者：<span class="ph">[卖家名称]</span></span>　　<span class="item">联系方式：<span class="ph">[邮箱 / 微信]</span></span></p>
-    <p>悬译没有统计分析，没有广告。<strong>只有使用内置「悬译 AI」时需要登录账号</strong>；Apple 翻译、系统词典、生词本，以及用你自己的 API 密钥（包括离线授权码解锁的「自定义 API」）都不需要账号。登录前，App 会请你阅读本政策和《用户协议》，并<strong>主动勾选同意</strong>（默认不勾选）；不同意可以继续使用不需要账号的功能。</p>
+    <p class="meta"><span class="item">版本：2026-10-22（最近更新）</span>　　<span class="item">运营者：<span class="ph">[卖家名称]</span></span>　　<span class="item">联系方式：<span class="ph">[邮箱 / 微信]</span></span></p>
+    <p>知译没有统计分析，没有广告。<strong>只有使用内置「知译 AI」时需要登录账号</strong>；Apple 翻译、系统词典、生词本，以及用你自己的 API 密钥（包括离线授权码解锁的「自定义 API」）都不需要账号。登录前，App 会请你阅读本政策和《用户协议》，并<strong>主动勾选同意</strong>（默认不勾选）；不同意可以继续使用不需要账号的功能。</p>
     <h2>在你的 Mac 上处理的内容</h2>
     <ul>
       <li><strong>截图</strong>：只截取指针附近或你框选的区域，在本机内存中识别文字，不保存到磁盘，也不上传。</li>
       <li><strong>Apple 翻译与词典</strong>：由 macOS 处理，适用 Apple 的隐私政策。</li>
-      <li><strong>本地数据</strong>：生词本、最近取词、设置、授权码和诊断记录（只有阶段、耗时和错误码，不含文字或截图）保存在 <code>~/Library/Application Support/HoverLing/</code>；你自己的 API 密钥和悬译账号的登录凭证保存在 macOS 钥匙串，不同步到 iCloud。删除该文件夹和钥匙串中的「local.hoverling」条目即可清除。</li>
+      <li><strong>本地数据</strong>：生词本、最近取词、设置、授权码和诊断记录（只有阶段、耗时和错误码，不含文字或截图）保存在 <code>~/Library/Application Support/HoverLing/</code>；你自己的 API 密钥和知译账号的登录凭证保存在 macOS 钥匙串，不同步到 iCloud。删除该文件夹和钥匙串中的「local.hoverling」条目即可清除。</li>
     </ul>
-    <h2>悬译账号</h2>
-    <p>登录悬译 AI 时，我们收集和保存：</p>
+    <h2>知译账号</h2>
+    <p>登录知译 AI 时，我们收集和保存：</p>
     <div class="tbl"><table>
       <thead><tr><th scope="col">信息</th><th scope="col">用途</th><th scope="col">怎么保存</th><th scope="col">保存多久</th></tr></thead>
       <tbody>
         <tr><td data-label="信息"><strong>邮箱地址</strong></td><td data-label="用途">发送登录 / 注销验证码，识别你的账号，客服查询</td><td data-label="怎么保存">加密保存（AES-256-GCM），另存一个带密钥的哈希用于查找；管理界面默认只显示打码形式（如 <code>li***@qq.com</code>），查看完整邮箱会留下审计记录</td><td data-label="保存多久">到你注销为止</td></tr>
         <tr><td data-label="信息">登录验证码</td><td data-label="用途">确认邮箱属于你</td><td data-label="怎么保存">只保存哈希，10 分钟后失效，用后即删</td><td data-label="保存多久">10 分钟</td></tr>
         <tr><td data-label="信息">本机机器码</td><td data-label="用途">每个账号最多 2 台设备；每台 Mac 只能领一次新用户体验</td><td data-label="怎么保存">只保存哈希（机器码本身是硬件标识经单向哈希后的短编码，无法还原硬件信息）</td><td data-label="保存多久">到注销或移除设备为止</td></tr>
-        <tr><td data-label="信息">设备名称（如「MacBook Pro」，你可以改）</td><td data-label="用途">在「设备」列表里让你认出每台 Mac</td><td data-label="怎么保存">加密保存</td><td data-label="保存多久">到注销或移除设备为止</td></tr>
+        <tr><td data-label="信息">设备名称（App 自动使用这台 Mac 的通用型号名，如「MacBook Pro」「iMac」；<strong>不使用</strong>你在系统设置里给电脑起的名称，因为它常含真实姓名）</td><td data-label="用途">在「设备」列表里让你认出每台 Mac</td><td data-label="怎么保存">加密保存</td><td data-label="保存多久">到注销或移除设备为止</td></tr>
         <tr><td data-label="信息">登录凭证</td><td data-label="用途">保持登录</td><td data-label="怎么保存">只保存哈希；180 天未使用自动失效，可随时退出或移除设备</td><td data-label="保存多久">失效后 30 天</td></tr>
         <tr><td data-label="信息">方案与兑换记录</td><td data-label="用途">你购买或兑换的方案、到期日、兑换码使用状态</td><td data-label="怎么保存">兑换码本身只保存哈希</td><td data-label="保存多久">到注销为止（兑换码保持「已使用」）</td></tr>
         <tr><td data-label="信息">购买备注（订单号等）</td><td data-label="用途">售后查询（我们在小红书私信里收到的订单信息，只记订单号，不记昵称）</td><td data-label="怎么保存">加密保存</td><td data-label="保存多久">到注销为止</td></tr>
@@ -157,7 +172,7 @@ main { padding-block: clamp(56px, 9vw, 112px) clamp(64px, 10vw, 128px); }
       </tbody>
     </table></div>
     <p>我们的服务器日志只记录接口路径、状态、方案、耗时和错误码，<strong>不记录邮箱、验证码、登录凭证、机器码或任何翻译文字</strong>；网关（Caddy）的错误日志会把你的 IP 打码到前两段（如 <code>113.87.0.0</code>），并删除机器码；日志按每个服务 30 MB 滚动覆盖。我们发给自己的运维告警（企业微信 / 钉钉 / 飞书群机器人）不含你的邮箱或账号 ID。</p>
-    <h2>使用内置「悬译 AI」时</h2>
+    <h2>使用内置「知译 AI」时</h2>
     <p>识别出的文字和附近最多约 2400 字的上下文，会经我们的服务器转发给 DeepSeek 完成翻译，结果直接传回你的 Mac。</p>
     <ul>
       <li><strong>我们的服务器不保存、不记录任何翻译文字。</strong></li>
@@ -169,7 +184,7 @@ main { padding-block: clamp(56px, 9vw, 112px) clamp(64px, 10vw, 128px); }
     <p>我们的服务器位于<strong>中国香港</strong>（<span class="ph">[服务器提供商，例如 腾讯云轻量应用服务器 中国香港地域]</span>）。对中国大陆用户而言，你的账号信息存放在香港属于个人信息出境。根据《个人信息保护法》第三十九条，告知如下：</p>
     <ul>
       <li><strong>境外接收方</strong>：<span class="ph">[卖家名称]</span>（即本服务运营者），联系方式 <span class="ph">[邮箱 / 微信]</span>；数据存放在 <span class="ph">[服务器提供商]</span> 位于香港的服务器上；</li>
-      <li><strong>处理目的和方式</strong>：提供账号登录、方案管理和悬译 AI 翻译服务，按上表方式加密或哈希保存；</li>
+      <li><strong>处理目的和方式</strong>：提供账号登录、方案管理和知译 AI 翻译服务，按上表方式加密或哈希保存；</li>
       <li><strong>个人信息种类</strong>：邮箱地址、设备名称、机器码哈希、方案与用量记录、购买备注；</li>
       <li><strong>你的权利</strong>：可随时查阅账号信息、在 App 内注销账号（见下文），或通过 <span class="ph">[邮箱 / 微信]</span> 联系我们行使查阅、更正、删除等权利。</li>
     </ul>
@@ -197,9 +212,9 @@ main { padding-block: clamp(56px, 9vw, 112px) clamp(64px, 10vw, 128px); }
     <h2>注销账号</h2>
     <p>在 App「账号与套餐 → 注销账号」中操作：我们会向你的账号邮箱发送一个注销验证码，输入后账号立即删除，不可恢复（已购方案随之失效）。也可以通过 <span class="ph">[邮箱 / 微信]</span> 联系我们代为注销。</p>
     <h2>授权码与机器码</h2>
-    <p>离线授权码在本机验证，不需要联网。登录后选择「绑定到账号」时，授权码会发送给我们的服务器验证一次，我们只记录授权 ID 和它绑定的账号。「本机机器码」只有在登录或使用悬译 AI 时才会离开你的 Mac。</p>
+    <p>离线授权码在本机验证，不需要联网。登录后选择「绑定到账号」时，授权码会发送给我们的服务器验证一次，我们只记录授权 ID 和它绑定的账号。「本机机器码」只有在登录或使用知译 AI 时才会离开你的 Mac。</p>
     <h2>未成年人</h2>
-    <p>悬译不面向 14 周岁以下的儿童。如果你未满 14 周岁，请在监护人同意和指导下使用。</p>
+    <p>知译不面向 14 周岁以下的儿童。如果你未满 14 周岁，请在监护人同意和指导下使用。</p>
     <h2>投诉、举报与联系我们</h2>
     <p>对本政策有疑问，需要查阅、更正、删除你的个人信息，或要投诉、举报（包括对 AI 生成内容的投诉），请联系 <span class="ph">[邮箱 / 微信]</span>。我们会在 <span class="ph">[15]</span> 个工作日内答复。</p>
   </div></article>
@@ -212,9 +227,9 @@ main { padding-block: clamp(56px, 9vw, 112px) clamp(64px, 10vw, 128px); }
       <a href="privacy.html" aria-current="page">隐私政策</a>
       <a href="eula.html">许可协议</a>
     </nav>
-    <p>悬译 AI 由 DeepSeek 提供（深度求索 DeepSeek 大模型，模型备案号：<span class="ph">[DeepSeek 备案号]</span>）</p>
+    <p>知译 AI 由 DeepSeek 提供（深度求索 DeepSeek 大模型，模型备案号：<span class="ph">[DeepSeek 备案号]</span>）</p>
     <p>本服务登记号：<span class="ph">[登记号]</span></p>
-    <p class="mono">© 2026 悬译 HoverLing</p>
+    <p class="mono">© 2026 知译 Zhiyi（原名悬译）</p>
     <p>Apple、Mac、macOS 是 Apple Inc. 的商标。其他服务名称归各自所有者所有。</p>
   </div>
 </footer>
